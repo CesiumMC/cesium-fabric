@@ -41,8 +41,8 @@ public abstract class MixinMinecraftServer {
 
     @Inject(method = "tickServer", at = @At("RETURN"))
     public void cesium$saveData(BooleanSupplier booleanSupplier, CallbackInfo ci) {
-        if (this.saveFuture != null) {
-            this.saveFuture.join();
+        if (this.saveFuture != null && !this.saveFuture.isDone()) {
+            return;
         }
 
         if (CesiumMod.config().saveAfterTick()) {
