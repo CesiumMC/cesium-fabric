@@ -1,12 +1,12 @@
 package de.yamayaki.cesium.maintenance.storage.anvil;
 
 import com.google.common.collect.ImmutableList;
-import de.yamayaki.cesium.CesiumMod;
 import de.yamayaki.cesium.api.accessor.RawAccess;
 import de.yamayaki.cesium.maintenance.storage.IChunkStorage;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.storage.RegionFileStorage;
 import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,13 +19,15 @@ import java.util.regex.Pattern;
 public class AnvilChunkStorage implements IChunkStorage {
     private static final Pattern REGEX = Pattern.compile("^r\\.(-?[0-9]+)\\.(-?[0-9]+)\\.mca$");
 
+    private final Logger logger;
     private final Path basePath;
 
     private final RegionFileStorage chunkData;
     private final RegionFileStorage poiData;
     private final RegionFileStorage entityData;
 
-    public AnvilChunkStorage(final Path basePath) {
+    public AnvilChunkStorage(final Logger logger, final Path basePath) {
+        this.logger = logger;
         this.basePath = basePath;
 
         this.chunkData = new RegionFileStorage(new RegionStorageInfo("cesium", null, "region"), basePath.resolve("region"), false);
@@ -81,7 +83,7 @@ public class AnvilChunkStorage implements IChunkStorage {
             this.poiData.close();
             this.entityData.close();
         } catch (IOException exception) {
-            CesiumMod.logger().warn("[ANVIL] Failed to close chunk storage", exception);
+            this.logger.error("[ANVIL] Failed to close chunk storage", exception);
         }
     }
 

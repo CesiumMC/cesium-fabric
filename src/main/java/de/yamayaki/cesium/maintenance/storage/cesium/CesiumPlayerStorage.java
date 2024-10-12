@@ -6,6 +6,8 @@ import de.yamayaki.cesium.api.database.IDBInstance;
 import de.yamayaki.cesium.common.spec.PlayerDatabaseSpecs;
 import de.yamayaki.cesium.maintenance.storage.IPlayerStorage;
 import net.minecraft.nbt.CompoundTag;
+import org.lmdbjava.LmdbException;
+import org.slf4j.Logger;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -13,9 +15,11 @@ import java.util.List;
 import java.util.UUID;
 
 public class CesiumPlayerStorage implements IPlayerStorage {
+    private final Logger logger;
     private final IDBInstance database;
 
-    public CesiumPlayerStorage(final Path basePath) {
+    public CesiumPlayerStorage(final Logger logger, final Path basePath) {
+        this.logger = logger;
         this.database = CesiumMod.openPlayerDB(basePath);
     }
 
@@ -36,7 +40,12 @@ public class CesiumPlayerStorage implements IPlayerStorage {
 
     @Override
     public void close() {
-        this.database.flushChanges();
+        try {
+            this.database.flushChanges();
+        } catch (LmdbException lmdbException) {
+            this.logger.error("Failed to flush data", lmdbException);
+        }
+
         this.database.close();
     }
 

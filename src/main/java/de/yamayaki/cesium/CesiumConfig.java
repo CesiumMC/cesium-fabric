@@ -1,5 +1,16 @@
 package de.yamayaki.cesium;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+
 public class CesiumConfig {
     private final Option<Boolean> log_map_grows = new Option<>(false, "Log when a database map is being resized.");
     private final Option<Boolean> show_debug_info = new Option<>(false, "Display information on the debug screen.");
@@ -40,6 +51,50 @@ public class CesiumConfig {
         public Option(T value, String comment) {
             this.value = value;
             this.comment = comment;
+        }
+    }
+
+    public static class Loader {
+        private final Path configPath;
+        private final Gson gson;
+
+        public Loader(@NotNull final Path configPath) {
+            this.configPath = configPath;
+            this.gson = new GsonBuilder()
+                    .serializeNulls()
+                    .setPrettyPrinting()
+                    .setLenient()
+                    .create();
+        }
+
+        public CesiumConfig get() {
+            try {
+                return this.loadConfig();
+            } catch (final IOException i) {
+                throw new RuntimeException("Failed to initialize Cesium config.", i);
+            }
+        }
+
+        private CesiumConfig loadConfig() throws IOException {
+            CesiumConfig config = null;
+
+            // Load from disk or create new default instance
+            if (Files.isRegularFile(this.configPath, LinkOption.NOFOLLOW_LINKS)) {
+                try (final BufferedReader bufferedReader = Files.newBufferedReader(this.configPath)) {
+                    config = this.gson.fromJson(bufferedReader, CesiumConfig.class);
+                }
+            }
+
+            if (config == null) {
+                config = new CesiumConfig();
+            }
+
+            // Save to disk and/ or add missing fields
+            try (final BufferedWriter bufferedWriter = Files.newBufferedWriter(this.configPath)) {
+                this.gson.toJson(config, CesiumConfig.class, bufferedWriter);
+            }
+
+            return config;
         }
     }
 }

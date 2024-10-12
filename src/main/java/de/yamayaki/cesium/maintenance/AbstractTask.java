@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class AbstractTask {
-    protected final Logger LOGGER = LogUtils.getLogger();
+    protected final Logger logger = LogUtils.getLogger();
 
     protected final LevelStorageSource.LevelStorageAccess levelAccess;
     protected final List<ResourceKey<Level>> levels;
@@ -48,7 +48,7 @@ public abstract class AbstractTask {
         final Thread workerThread = new Thread(this::runTasks, "Cesium-" + task + "-Database");
         workerThread.setDaemon(true);
         workerThread.setUncaughtExceptionHandler((thread, throwable) -> {
-            LOGGER.error("Uncaught exception while {} world!", task, throwable);
+            this.logger.error("Uncaught exception while {} world!", task, throwable);
             this.running.set(false);
         });
 
@@ -89,6 +89,10 @@ public abstract class AbstractTask {
 
     public double percentage() {
         return this.currentElement() / (double) Math.max(this.totalElements(), 1);
+    }
+
+    public Logger logger() {
+        return this.logger;
     }
 
     public enum Task {

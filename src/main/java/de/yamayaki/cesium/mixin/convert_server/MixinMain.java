@@ -1,7 +1,6 @@
 package de.yamayaki.cesium.mixin.convert_server;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import de.yamayaki.cesium.CesiumMod;
 import de.yamayaki.cesium.maintenance.AbstractTask;
 import de.yamayaki.cesium.maintenance.tasks.DatabaseConvert;
 import joptsimple.OptionParser;
@@ -57,11 +56,12 @@ public class MixinMain {
 
     @Unique
     private static void doWorldConversion(final AbstractTask.Task task, final LevelStorageSource.LevelStorageAccess levelAccess, final RegistryAccess registryAccess) {
-        var logger = CesiumMod.logger();
+        var databaseConvert = new DatabaseConvert(task, levelAccess, registryAccess);
+        var logger = databaseConvert.logger();
 
         logger.info("Starting world conversion ...");
 
-        final DatabaseConvert databaseConvert = new DatabaseConvert(task, levelAccess, registryAccess);
+        databaseConvert.logger();
 
         String previousStatus = null;
         String currentStatus;

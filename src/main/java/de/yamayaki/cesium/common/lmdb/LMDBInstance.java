@@ -1,6 +1,6 @@
 package de.yamayaki.cesium.common.lmdb;
 
-import de.yamayaki.cesium.CesiumMod;
+import de.yamayaki.cesium.CesiumConfig;
 import de.yamayaki.cesium.api.database.DatabaseSpec;
 import de.yamayaki.cesium.api.database.IDBInstance;
 import de.yamayaki.cesium.api.database.IKVDatabase;
@@ -15,9 +15,8 @@ import org.lmdbjava.EnvInfo;
 import org.lmdbjava.LmdbException;
 import org.lmdbjava.Stat;
 import org.lmdbjava.Txn;
+import org.slf4j.Logger;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -25,29 +24,28 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class LMDBInstance implements IDBInstance {
+    private final Reference2ObjectMap<DatabaseSpec<?, ?>, KVDatabase<?, ?>> databases = new Reference2ObjectOpenHashMap<>();
+    private final Reference2ObjectMap<DatabaseSpec<?, ?>, KVTransaction<?, ?>> transactions = new Reference2ObjectOpenHashMap<>();
+
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+
+    protected final Logger logger;
+    protected final boolean logsMapGrows;
+
     protected final Env<byte[]> env;
 
-    protected final Reference2ObjectMap<DatabaseSpec<?, ?>, KVDatabase<?, ?>> databases = new Reference2ObjectOpenHashMap<>();
-    protected final Reference2ObjectMap<DatabaseSpec<?, ?>, KVTransaction<?, ?>> transactions = new Reference2ObjectOpenHashMap<>();
-
-    protected final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     protected final int MAX_COMMIT_TRIES = 3;
     protected final int resizeStep;
 
     protected volatile boolean isDirty = false;
 
-    public LMDBInstance(Path dir, String name, DatabaseSpec<?, ?>[] databases) {
-        if (!Files.isDirectory(dir)) {
-            try {
-                Files.createDirectories(dir);
-            } catch (IOException ioException) {
-                throw new RuntimeException("Failed to create directory.", ioException);
-            }
-        }
+    public LMDBInstance(final Path databasePath, final DatabaseSpec<?, ?>[] databases, final Logger logger, final CesiumConfig config) {
+        this.logger = logger;
+        this.logsMapGrows = config.logMapGrows();
 
         this.env = Env.create(ByteArrayProxy.PROXY_BA)
                 .setMaxDbs(databases.length)
-                .open(dir.resolve(name + CesiumMod.getFileEnding()).toFile(), EnvFlags.MDB_NOLOCK, EnvFlags.MDB_NOSUBDIR);
+                .open(databasePath.toFile(), EnvFlags.MDB_NOLOCK, EnvFlags.MDB_NOSUBDIR);
 
         this.resizeStep = Arrays.stream(databases).mapToInt(DatabaseSpec::getInitialSize).sum();
 
@@ -57,7 +55,7 @@ public class LMDBInstance implements IDBInstance {
         }
 
         for (DatabaseSpec<?, ?> spec : databases) {
-            KVDatabase<?, ?> database = new KVDatabase<>(this, spec);
+            KVDatabase<?, ?> database = new KVDatabase<>(this, spec, !config.isUncompressed());
 
             this.databases.put(spec, database);
             this.transactions.put(spec, new KVTransaction<>(database));
@@ -122,7 +120,7 @@ public class LMDBInstance implements IDBInstance {
                     continue;
                 }
 
-                CesiumMod.logger().info("Commit of transaction failed; trying again ({}/{}): {}", tries, this.MAX_COMMIT_TRIES, l.getMessage());
+                this.logger.info("Commit of transaction failed; trying again ({}/{}): {}", tries, this.MAX_COMMIT_TRIES, l.getMessage());
             }
 
             if (tries == MAX_COMMIT_TRIES) {
@@ -172,8 +170,8 @@ public class LMDBInstance implements IDBInstance {
 
         this.env.setMapSize(newSize);
 
-        if (CesiumMod.config().logMapGrows()) {
-            CesiumMod.logger().info("Grew map size from {} to {} MB", (oldSize / 1024 / 1024), (newSize / 1024 / 1024));
+        if (this.logsMapGrows) {
+            this.logger.info("Grew map size from {} to {} MB", (oldSize / 1024 / 1024), (newSize / 1024 / 1024));
         }
     }
 

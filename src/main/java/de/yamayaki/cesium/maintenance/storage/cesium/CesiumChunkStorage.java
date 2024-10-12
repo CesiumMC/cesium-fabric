@@ -7,15 +7,18 @@ import de.yamayaki.cesium.common.spec.WorldDatabaseSpecs;
 import de.yamayaki.cesium.maintenance.storage.IChunkStorage;
 import net.minecraft.world.level.ChunkPos;
 import org.lmdbjava.LmdbException;
+import org.slf4j.Logger;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CesiumChunkStorage implements IChunkStorage {
+    private final Logger logger;
     private final IDBInstance database;
 
-    public CesiumChunkStorage(final Path basePath) {
+    public CesiumChunkStorage(final Logger logger, final Path basePath) {
+        this.logger = logger;
         this.database = CesiumMod.openWorldDB(basePath);
     }
 
@@ -39,7 +42,7 @@ public class CesiumChunkStorage implements IChunkStorage {
         try {
             this.database.flushChanges();
         } catch (LmdbException lmdbException) {
-            CesiumMod.logger().error("Failed to flush data", lmdbException);
+            this.logger.error("Failed to flush data", lmdbException);
         }
     }
 

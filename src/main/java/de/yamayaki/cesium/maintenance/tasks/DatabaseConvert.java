@@ -1,6 +1,5 @@
 package de.yamayaki.cesium.maintenance.tasks;
 
-import de.yamayaki.cesium.CesiumMod;
 import de.yamayaki.cesium.maintenance.AbstractTask;
 import de.yamayaki.cesium.maintenance.storage.IChunkStorage;
 import de.yamayaki.cesium.maintenance.storage.IPlayerStorage;
@@ -53,7 +52,7 @@ public class DatabaseConvert extends AbstractTask {
         ) {
             final List<UUID> playerList = _old.getAllPlayers();
 
-            CesiumMod.logger().info("Converting {} player profiles", playerList.size());
+            this.logger.info("Converting {} player profiles", playerList.size());
 
             final Iterator<UUID> iterator = playerList.iterator();
 
@@ -118,24 +117,24 @@ public class DatabaseConvert extends AbstractTask {
             _new.setPOIData(chunkPos, _old.getPOIData(chunkPos));
             _new.setEntityData(chunkPos, _old.getEntityData(chunkPos));
         }, Util.backgroundExecutor()).exceptionally(throwable -> {
-            LOGGER.error("Could not copy chunk into new storage.", throwable);
+            this.logger.error("Could not copy chunk into new storage.", throwable);
             return null;
         });
     }
 
     private @NotNull IChunkStorage cStorage(final Path path, final boolean old) {
         if (!old) {
-            return this.task == Task.TO_ANVIL ? new AnvilChunkStorage(path) : new CesiumChunkStorage(path);
+            return this.task == Task.TO_ANVIL ? new AnvilChunkStorage(this.logger, path) : new CesiumChunkStorage(this.logger, path);
         } else {
-            return this.task == Task.TO_ANVIL ? new CesiumChunkStorage(path) : new AnvilChunkStorage(path);
+            return this.task == Task.TO_ANVIL ? new CesiumChunkStorage(this.logger, path) : new AnvilChunkStorage(this.logger, path);
         }
     }
 
     private @NotNull IPlayerStorage pStorage(final Path path, final boolean old) {
         if (!old) {
-            return this.task == Task.TO_ANVIL ? new AnvilPlayerStorage(path) : new CesiumPlayerStorage(path);
+            return this.task == Task.TO_ANVIL ? new AnvilPlayerStorage(this.logger, path) : new CesiumPlayerStorage(this.logger, path);
         } else {
-            return this.task == Task.TO_ANVIL ? new CesiumPlayerStorage(path) : new AnvilPlayerStorage(path);
+            return this.task == Task.TO_ANVIL ? new CesiumPlayerStorage(this.logger, path) : new AnvilPlayerStorage(this.logger, path);
         }
     }
 }

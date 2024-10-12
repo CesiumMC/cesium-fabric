@@ -1,6 +1,5 @@
 package de.yamayaki.cesium.common.lmdb;
 
-import de.yamayaki.cesium.CesiumMod;
 import de.yamayaki.cesium.api.database.DatabaseSpec;
 import de.yamayaki.cesium.api.database.ICloseableIterator;
 import de.yamayaki.cesium.api.database.IKVDatabase;
@@ -30,7 +29,7 @@ public class KVDatabase<K, V> implements IKVDatabase<K, V> {
 
     private final ICompressor compressor;
 
-    public KVDatabase(LMDBInstance storage, DatabaseSpec<K, V> spec) {
+    public KVDatabase(LMDBInstance storage, DatabaseSpec<K, V> spec, boolean compressed) {
         this.storage = storage;
 
         this.env = this.storage.env;
@@ -39,9 +38,7 @@ public class KVDatabase<K, V> implements IKVDatabase<K, V> {
         this.keySerializer = DefaultSerializers.getSerializer(spec.getKeyType());
         this.valueSerializer = DefaultSerializers.getSerializer(spec.getValueType());
 
-        this.compressor = CesiumMod.config().isUncompressed()
-                ? DefaultCompressors.NONE
-                : DefaultCompressors.ZSTD;
+        this.compressor = compressed ? DefaultCompressors.ZSTD : DefaultCompressors.NONE;
     }
 
     @Override
