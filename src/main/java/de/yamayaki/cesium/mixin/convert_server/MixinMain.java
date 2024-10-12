@@ -10,7 +10,6 @@ import joptsimple.OptionSpec;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.Main;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -58,7 +57,8 @@ public class MixinMain {
 
     @Unique
     private static void doWorldConversion(final AbstractTask.Task task, final LevelStorageSource.LevelStorageAccess levelAccess, final RegistryAccess registryAccess) {
-        final Logger logger = CesiumMod.logger();
+        var logger = CesiumMod.logger();
+
         logger.info("Starting world conversion ...");
 
         final DatabaseConvert databaseConvert = new DatabaseConvert(task, levelAccess, registryAccess);

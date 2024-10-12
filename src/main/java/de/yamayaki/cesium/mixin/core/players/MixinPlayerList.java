@@ -1,12 +1,10 @@
 package de.yamayaki.cesium.mixin.core.players;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import de.yamayaki.cesium.CesiumMod;
 import de.yamayaki.cesium.api.accessor.DatabaseSetter;
 import de.yamayaki.cesium.api.accessor.DatabaseSource;
-import de.yamayaki.cesium.api.database.DatabaseSpec;
 import de.yamayaki.cesium.api.database.IDBInstance;
-import de.yamayaki.cesium.common.lmdb.LMDBInstance;
-import de.yamayaki.cesium.common.spec.PlayerDatabaseSpecs;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerAdvancements;
@@ -40,11 +38,7 @@ public class MixinPlayerList implements DatabaseSource {
     private void initCesiumPlayers(MinecraftServer minecraftServer, LayeredRegistryAccess<?> layeredRegistryAccess, PlayerDataStorage playerDataStorage, int i, CallbackInfo ci) {
         final Path path = minecraftServer.getWorldPath(LevelResource.PLAYER_ADVANCEMENTS_DIR).getParent();
 
-        this.database = new LMDBInstance(path, "players", new DatabaseSpec[]{
-                PlayerDatabaseSpecs.PLAYER_DATA,
-                PlayerDatabaseSpecs.ADVANCEMENTS,
-                PlayerDatabaseSpecs.STATISTICS
-        });
+        this.database = CesiumMod.openPlayerDB(path);
 
         ((DatabaseSetter) this.playerIo)
                 .cesium$setStorage(this.database);

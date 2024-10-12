@@ -1,13 +1,13 @@
 package de.yamayaki.cesium.mixin.core.upgrader;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import de.yamayaki.cesium.CesiumMod;
 import de.yamayaki.cesium.api.accessor.DatabaseActions;
 import de.yamayaki.cesium.api.accessor.DatabaseSetter;
 import de.yamayaki.cesium.api.accessor.SpecificationSetter;
 import de.yamayaki.cesium.api.database.DatabaseSpec;
 import de.yamayaki.cesium.api.database.ICloseableIterator;
 import de.yamayaki.cesium.api.database.IDBInstance;
-import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.WorldDatabaseSpecs;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -85,11 +85,7 @@ public abstract class MixinWorldUpgrader {
             )
     )
     public <T extends AutoCloseable> void cesiumCreate(CallbackInfoReturnable<List<WorldUpgrader.DimensionToUpgrade<T>>> cir, @Local Path path, @Local RegionStorageInfo regionStorageInfo, @Local AutoCloseable autoCloseable) {
-        IDBInstance dbInstance = new LMDBInstance(path.getParent(), "chunks", new DatabaseSpec[]{
-                WorldDatabaseSpecs.CHUNK_DATA,
-                WorldDatabaseSpecs.POI,
-                WorldDatabaseSpecs.ENTITY
-        });
+        IDBInstance dbInstance = CesiumMod.openWorldDB(path.getParent());
         tmpDatabase = dbInstance;
 
         DatabaseSpec<ChunkPos, CompoundTag> databaseSpec = switch (regionStorageInfo.type()) {

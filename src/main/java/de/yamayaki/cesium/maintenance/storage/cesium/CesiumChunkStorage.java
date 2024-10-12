@@ -1,10 +1,8 @@
 package de.yamayaki.cesium.maintenance.storage.cesium;
 
 import de.yamayaki.cesium.CesiumMod;
-import de.yamayaki.cesium.api.database.DatabaseSpec;
 import de.yamayaki.cesium.api.database.ICloseableIterator;
 import de.yamayaki.cesium.api.database.IDBInstance;
-import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.WorldDatabaseSpecs;
 import de.yamayaki.cesium.maintenance.storage.IChunkStorage;
 import net.minecraft.world.level.ChunkPos;
@@ -18,13 +16,8 @@ public class CesiumChunkStorage implements IChunkStorage {
     private final IDBInstance database;
 
     public CesiumChunkStorage(final Path basePath) {
-        this.database = new LMDBInstance(basePath, "chunks", new DatabaseSpec[]{
-                WorldDatabaseSpecs.CHUNK_DATA,
-                WorldDatabaseSpecs.POI,
-                WorldDatabaseSpecs.ENTITY
-        });
+        this.database = CesiumMod.openWorldDB(basePath);
     }
-
 
     @Override
     public List<ChunkPos> getAllChunks() {
@@ -46,7 +39,7 @@ public class CesiumChunkStorage implements IChunkStorage {
         try {
             this.database.flushChanges();
         } catch (LmdbException lmdbException) {
-            CesiumMod.logger().info(lmdbException);
+            CesiumMod.logger().error("Failed to flush data", lmdbException);
         }
     }
 

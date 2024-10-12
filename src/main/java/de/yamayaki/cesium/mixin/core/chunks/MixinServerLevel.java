@@ -1,10 +1,8 @@
 package de.yamayaki.cesium.mixin.core.chunks;
 
+import de.yamayaki.cesium.CesiumMod;
 import de.yamayaki.cesium.api.accessor.DatabaseSource;
-import de.yamayaki.cesium.api.database.DatabaseSpec;
 import de.yamayaki.cesium.api.database.IDBInstance;
-import de.yamayaki.cesium.common.lmdb.LMDBInstance;
-import de.yamayaki.cesium.common.spec.WorldDatabaseSpecs;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -36,11 +34,7 @@ public class MixinServerLevel implements DatabaseSource {
             )
     )
     public void initCesiumChunkStorage(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, ResourceKey resourceKey, LevelStem levelStem, ChunkProgressListener chunkProgressListener, boolean bl, long l, List list, boolean bl2, RandomSequences randomSequences, CallbackInfo ci) {
-        this.database = new LMDBInstance(levelStorageAccess.getDimensionPath(resourceKey), "chunks", new DatabaseSpec[]{
-                WorldDatabaseSpecs.CHUNK_DATA,
-                WorldDatabaseSpecs.POI,
-                WorldDatabaseSpecs.ENTITY
-        });
+        this.database = CesiumMod.openWorldDB(levelStorageAccess.getDimensionPath(resourceKey));
     }
 
     @Inject(method = "close", at = @At("RETURN"))

@@ -1,9 +1,8 @@
 package de.yamayaki.cesium.maintenance.storage.cesium;
 
-import de.yamayaki.cesium.api.database.DatabaseSpec;
+import de.yamayaki.cesium.CesiumMod;
 import de.yamayaki.cesium.api.database.ICloseableIterator;
 import de.yamayaki.cesium.api.database.IDBInstance;
-import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.PlayerDatabaseSpecs;
 import de.yamayaki.cesium.maintenance.storage.IPlayerStorage;
 import net.minecraft.nbt.CompoundTag;
@@ -17,11 +16,7 @@ public class CesiumPlayerStorage implements IPlayerStorage {
     private final IDBInstance database;
 
     public CesiumPlayerStorage(final Path basePath) {
-        this.database = new LMDBInstance(basePath, "players", new DatabaseSpec[]{
-                PlayerDatabaseSpecs.PLAYER_DATA,
-                PlayerDatabaseSpecs.ADVANCEMENTS,
-                PlayerDatabaseSpecs.STATISTICS
-        });
+        this.database = CesiumMod.openPlayerDB(basePath);
     }
 
     @Override
