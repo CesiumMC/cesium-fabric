@@ -61,8 +61,6 @@ public class MixinMain {
 
         logger.info("Starting world conversion ...");
 
-        databaseConvert.logger();
-
         String previousStatus = null;
         String currentStatus;
 
