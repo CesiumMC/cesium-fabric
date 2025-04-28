@@ -2,6 +2,7 @@ package de.yamayaki.cesium.maintenance.screens;
 
 import de.yamayaki.cesium.maintenance.AbstractTask;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.FrameLayout;
@@ -38,7 +39,10 @@ public class CesiumTasksScreen extends Screen {
 
         layout.addChild(this.taskButton("Anvil → Cesium", AbstractTask.Task.TO_CESIUM));
         layout.addChild(this.taskButton("Cesium → Anvil", AbstractTask.Task.TO_ANVIL));
-        layout.addChild(this.taskButton("Compact Database", AbstractTask.Task.COMPACT));
+
+        if(FabricLoader.getInstance().isDevelopmentEnvironment()) {
+            layout.addChild(this.taskButton("Compact Database", AbstractTask.Task.COMPACT));
+        }
 
         layout.addChild(new SpacerElement(200, 20));
 
