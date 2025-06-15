@@ -10,6 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonColors;
 import net.minecraft.world.level.storage.LevelStorageSource;
 
 public class CesiumWorkScreen extends Screen {
@@ -56,7 +57,7 @@ public class CesiumWorkScreen extends Screen {
     public void render(GuiGraphics guiGraphics, int i, int j, float f) {
         super.render(guiGraphics, i, j, f);
 
-        final int textColor = 16777215;
+        final int textColor = CommonColors.WHITE;
         final int textOffset = 14;
 
         final int offsetX = this.width / 2;
