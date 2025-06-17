@@ -5,7 +5,6 @@ import de.yamayaki.cesium.api.accessor.RawAccess;
 import de.yamayaki.cesium.maintenance.storage.IChunkStorage;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.storage.RegionFileStorage;
-import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -30,9 +29,9 @@ public class AnvilChunkStorage implements IChunkStorage {
         this.logger = logger;
         this.basePath = basePath;
 
-        this.chunkData = new RegionFileStorage(new RegionStorageInfo("cesium", null, "region"), basePath.resolve("region"), false);
-        this.poiData = new RegionFileStorage(new RegionStorageInfo("cesium", null, "poi"), basePath.resolve("poi"), false);
-        this.entityData = new RegionFileStorage(new RegionStorageInfo("cesium", null, "entities"), basePath.resolve("entities"), false);
+        this.chunkData = new RegionFileStorage(/*? >=1.20.6 {*/ new net.minecraft.world.level.chunk.storage.RegionStorageInfo("cesium", null, "region"), /*?}*/ basePath.resolve("region"), false);
+        this.poiData = new RegionFileStorage(/*? >=1.20.6 {*/ new net.minecraft.world.level.chunk.storage.RegionStorageInfo("cesium", null, "poi"), /*?}*/ basePath.resolve("poi"), false);
+        this.entityData = new RegionFileStorage(/*? >=1.20.6 {*/ new net.minecraft.world.level.chunk.storage.RegionStorageInfo("cesium", null, "entities"), /*?}*/ basePath.resolve("entities"), false);
     }
 
     @Override

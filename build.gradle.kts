@@ -1,12 +1,10 @@
 import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
-    id("fabric-loom") version "1.9.2"
+    id("fabric-loom") version "1.10.5"
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
-
-base.archivesName.set("${project.property("archives_base_name")}+${project.property("minecraft_version")}")
+base.archivesName.set("${project.property("archives_base_name")}+${stonecutter.current.project}")
 
 version = project.property("mod_version").toString()
 group = project.property("maven_group").toString()
@@ -15,13 +13,9 @@ repositories {
     mavenCentral()
 }
 
-loom {
-    accessWidenerPath = file("src/main/resources/cesium.accesswidener")
-}
-
 dependencies {
     // Declare Minecraft version and use Mojang's mappings
-    minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
+    minecraft("com.mojang:minecraft:${stonecutter.current.project}")
     mappings(loom.officialMojangMappings())
 
     // Fabric stuff
@@ -43,21 +37,59 @@ dependencies {
     include("com.github.jnr:jnr-x86asm:1.0.2")
 }
 
+val accessWidenerFile = when {
+    stonecutter.eval(stonecutter.current.version, ">=1.20.6") -> "1.20.6"
+    else -> "1.20.1"
+} + ".aw"
+
+val mixinsFile = when {
+    stonecutter.eval(stonecutter.current.version, ">=1.20.6") -> "1.20.6"
+    else -> "1.20.1"
+} + ".mixins.json"
+
+loom {
+    runConfigs.all {
+        ideConfigGenerated(true)
+        runDir = "../../run"
+    }
+
+    accessWidenerPath = file("../../src/main/resources/cesium/accesswideners/$accessWidenerFile")
+}
+
 tasks.processResources {
     inputs.property("version", project.property("mod_version"))
 
+    val properties = mapOf(
+        "v_minecraft" to stonecutter.current.project,
+        "v_mod" to project.property("mod_version"),
+        "v_fabric" to project.property("loader_version"),
+        "aw_file" to accessWidenerFile,
+        "mixins_file" to mixinsFile
+    )
+
     filesMatching("fabric.mod.json") {
-        expand("version" to project.property("mod_version"))
+        expand(properties)
     }
 }
 
+
+val java = if (stonecutter.eval(stonecutter.current.version, ">=1.20.5"))
+    JavaVersion.VERSION_21 else JavaVersion.VERSION_17
+
 java {
     withSourcesJar()
+
+    targetCompatibility = java
+    sourceCompatibility = java
+
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(java.majorVersion)
+    }
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.release.set(21)
+    options.release.set(Integer.parseInt(java.majorVersion))
 }
 
 tasks.withType<RemapJarTask> {

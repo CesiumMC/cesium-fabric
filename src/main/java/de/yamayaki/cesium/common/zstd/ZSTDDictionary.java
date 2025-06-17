@@ -53,7 +53,7 @@ public class ZSTDDictionary implements AutoCloseable {
     }
 
     private byte[] loadFromResources(final String name) throws IOException {
-        try (final InputStream inputStream = CesiumMod.class.getResourceAsStream("/dictionaries/" + name + ".zstd.dict")) {
+        try (final InputStream inputStream = CesiumMod.class.getResourceAsStream("/cesium/dictionaries/" + name + ".zstd.dict")) {
             if (inputStream == null) {
                 throw new IOException("Dictionary file not available: " + name);
             }

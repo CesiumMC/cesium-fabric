@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "cesium",
-  "version": "${version}",
+  "version": "${v_mod}",
   "name": "Cesium",
   "description": "An alternative storage format for Minecraft worlds which improves performance and reliability.",
   "authors": [
@@ -20,16 +20,13 @@
       "de.yamayaki.cesium.CesiumMod"
     ]
   },
-  "accessWidener": "cesium.accesswidener",
   "mixins": [
-    "cesium.mixins.json"
+    "cesium/mixins/${mixins_file}"
   ],
+  "accesswidener": "cesium/accesswideners/${aw_file}",
   "depends": {
-    "fabricloader": ">=0.15.10",
-    "minecraft": [
-      "1.21.5",
-      "1.21.6"
-    ]
+    "fabricloader": "${v_fabric}",
+    "minecraft": "${v_minecraft}"
   },
   "breaks": {
     "c2me-rewrites-chunkio": "*",

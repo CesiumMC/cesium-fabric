@@ -33,7 +33,11 @@ public abstract class AbstractTask {
         this.levelAccess = levelAccess;
 
         this.levels = registryAccess
+                //? if >= 1.21.2 {
                 .lookupOrThrow(Registries.LEVEL_STEM)
+                //?} else {
+                /*.registryOrThrow(Registries.LEVEL_STEM)
+                *///?}
                 .registryKeySet()
                 .stream().map(Registries::levelStemToLevel)
                 .toList();

@@ -19,8 +19,12 @@ import java.nio.file.attribute.FileAttribute;
 
 @Mixin(PlayerDataStorage.class)
 public class MixinPlayerDataStorage implements DatabaseSetter {
-    @Unique
-    private IDBInstance database;
+    @Unique private IDBInstance database;
+
+    @Override
+    public void cesium$setStorage(IDBInstance storage) {
+        this.database = storage;
+    }
 
     @Redirect(
             method = "<init>",
@@ -33,13 +37,12 @@ public class MixinPlayerDataStorage implements DatabaseSetter {
         return true;
     }
 
-    @Override
-    public void cesium$setStorage(IDBInstance storage) {
-        this.database = storage;
-    }
-
     @Redirect(
+            //? >= 1.20.6 {
             method = "load(Lnet/minecraft/world/entity/player/Player;Ljava/lang/String;)Ljava/util/Optional;",
+            //?} else {
+            /*method = "load(Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/nbt/CompoundTag;",
+            *///?}
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/io/File;exists()Z"
@@ -50,7 +53,11 @@ public class MixinPlayerDataStorage implements DatabaseSetter {
     }
 
     @Redirect(
+            //? >= 1.20.6 {
             method = "load(Lnet/minecraft/world/entity/player/Player;Ljava/lang/String;)Ljava/util/Optional;",
+            //?} else {
+            /*method = "load",
+            *///?}
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/io/File;isFile()Z"
@@ -61,7 +68,11 @@ public class MixinPlayerDataStorage implements DatabaseSetter {
     }
 
     @Redirect(
+            //? >= 1.20.6 {
             method = "load(Lnet/minecraft/world/entity/player/Player;Ljava/lang/String;)Ljava/util/Optional;",
+            //?} else {
+            /*method = "load",
+            *///?}
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/nbt/NbtIo;readCompressed(Ljava/nio/file/Path;Lnet/minecraft/nbt/NbtAccounter;)Lnet/minecraft/nbt/CompoundTag;"
