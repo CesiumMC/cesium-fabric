@@ -35,7 +35,7 @@ public class ChunkExporterMixin {
                 return;
             }
 
-            NbtIo.write(pendingStore.data, basePath.resolve(chunkPos.toLong() + ".nbt"));
+            NbtIo.write(pendingStore.data, basePath.resolve(chunkPos.toLong() + ".nbt")/*? <= 1.20.1 {*/ /*.toFile() *//*?}*/);
         } catch (IOException ignored) {
         }
     }

@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.Screen;
@@ -29,13 +28,26 @@ public class CesiumTasksScreen extends Screen {
     }
 
     public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+        //? <= 1.20.1 {
+        /*this.renderDirtBackground(guiGraphics);
+        *///?} else {
         super.render(guiGraphics, i, j, f);
+        //?}
+
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 16777215);
+
+        //? <= 1.20.1 {
+        /*super.render(guiGraphics, i, j, f);
+        *///?}
     }
 
     @Override
     protected void init() {
+        //? >= 1.20.4 {
         var layout = LinearLayout.vertical().spacing(5);
+        //?} else {
+        /*var layout = new LinearLayout(this.width / 2 - 100, 38, this.width, 120, LinearLayout.Orientation.VERTICAL);
+        *///?}
 
         layout.addChild(this.taskButton("Anvil → Cesium", AbstractTask.Task.TO_CESIUM));
         layout.addChild(this.taskButton("Cesium → Anvil", AbstractTask.Task.TO_ANVIL));
@@ -51,7 +63,10 @@ public class CesiumTasksScreen extends Screen {
         layout.visitWidgets(this::addRenderableWidget);
 
         layout.arrangeElements();
-        FrameLayout.centerInRectangle(layout, this.getRectangle());
+
+        //? >= 1.20.4 {
+        net.minecraft.client.gui.layouts.FrameLayout.centerInRectangle(layout, this.getRectangle());
+        //?}
     }
 
     @Unique
@@ -75,7 +90,7 @@ public class CesiumTasksScreen extends Screen {
             final var worldOpenFlows = this.minecraft.createWorldOpenFlows();
             final var packRepository = ServerPacksSource.createPackRepository(this.levelAccess);
 
-            try (final WorldStem worldStem = worldOpenFlows.loadWorldStem(levelAccess.getDataTag(), false, packRepository)) {
+            try (final WorldStem worldStem = worldOpenFlows.loadWorldStem(levelAccess /*? >= 1.20.4 {*/.getDataTag()/*?}*/, false/*? >= 1.20.4 {*/, packRepository/*?}*/)) {
                 final var worldData = worldStem.worldData();
                 final var frozen = worldStem.registries().compositeAccess();
 

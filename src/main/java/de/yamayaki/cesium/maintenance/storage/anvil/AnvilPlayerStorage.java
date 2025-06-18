@@ -3,7 +3,6 @@ package de.yamayaki.cesium.maintenance.storage.anvil;
 import de.yamayaki.cesium.FileHelper;
 import de.yamayaki.cesium.maintenance.storage.IPlayerStorage;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import org.slf4j.Logger;
 
@@ -67,7 +66,7 @@ public class AnvilPlayerStorage implements IPlayerStorage {
                 Files.createFile(savePath);
             }
 
-            NbtIo.writeCompressed(compoundTag, savePath);
+            NbtIo.writeCompressed(compoundTag, savePath/*? <= 1.20.1 {*/ /*.toFile() *//*?}*/);
         } catch (IOException exception) {
             this.logger.warn("[ANVIL] Failed to save player data for {}", uuid);
         }
@@ -80,7 +79,7 @@ public class AnvilPlayerStorage implements IPlayerStorage {
         try {
             final Path savePath = this.playerData.resolve(uuid.toString() + ".dat");
             if (Files.isRegularFile(savePath)) {
-                compoundTag = NbtIo.readCompressed(savePath, NbtAccounter.unlimitedHeap());
+                compoundTag = NbtIo.readCompressed(savePath/*? <= 1.20.1 {*/ /*.toFile() *//*?}*/ /*? >= 1.20.4 {*/, net.minecraft.nbt.NbtAccounter.unlimitedHeap() /*?}*/);
             }
         } catch (IOException exception) {
             this.logger.warn("[ANVIL] Failed to load player data for {}", uuid);
