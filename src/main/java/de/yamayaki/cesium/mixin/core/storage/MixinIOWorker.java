@@ -12,6 +12,7 @@ import net.minecraft.world.level.chunk.storage.IOWorker;
 import net.minecraft.world.level.chunk.storage.RegionFileStorage;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,18 +22,10 @@ import java.io.IOException;
 
 @Mixin(IOWorker.class)
 public abstract class MixinIOWorker implements DatabaseSetter, SpecificationSetter, DatabaseActions {
-    @Shadow
-    @Final
-    private RegionFileStorage storage;
+    @Mutable @Shadow @Final private RegionFileStorage storage;
 
-    @Unique
-    private IDBInstance database;
-
-    @Unique
-    private DatabaseSpec<ChunkPos, CompoundTag> databaseSpec;
-
-    @Unique
-    private boolean isCesium = false;
+    @Unique private IDBInstance database;
+    @Unique private DatabaseSpec<ChunkPos, CompoundTag> databaseSpec;
 
     /**
      * @author Yamayaki
@@ -46,7 +39,7 @@ public abstract class MixinIOWorker implements DatabaseSetter, SpecificationSett
             )
     )
     private CompoundTag cesium$read(RegionFileStorage instance, ChunkPos chunkPos) throws IOException {
-        if (this.isCesium) {
+        if (instance == null) {
             return this.database
                     .getDatabase(this.databaseSpec)
                     .getValue(chunkPos);
@@ -67,7 +60,7 @@ public abstract class MixinIOWorker implements DatabaseSetter, SpecificationSett
             )
     )
     private void cesium$scanChunk(RegionFileStorage instance, ChunkPos chunkPos, StreamTagVisitor streamTagVisitor) throws IOException {
-        if (this.isCesium) {
+        if (instance == null) {
             this.database
                     .getDatabase(this.databaseSpec)
                     .scan(chunkPos, streamTagVisitor);
@@ -88,7 +81,7 @@ public abstract class MixinIOWorker implements DatabaseSetter, SpecificationSett
             )
     )
     private void cesium$flush(RegionFileStorage instance) throws IOException {
-        if (!this.isCesium) {
+        if (instance != null) {
             instance.flush();
         }
     }
@@ -101,7 +94,7 @@ public abstract class MixinIOWorker implements DatabaseSetter, SpecificationSett
             )
     )
     private void cesium$write(RegionFileStorage instance, ChunkPos chunkPos, CompoundTag compoundTag) throws IOException {
-        if (this.isCesium) {
+        if (instance == null) {
             this.database
                     .getTransaction(this.databaseSpec)
                     .add(chunkPos, compoundTag);
@@ -112,7 +105,7 @@ public abstract class MixinIOWorker implements DatabaseSetter, SpecificationSett
 
     @Redirect(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/storage/RegionFileStorage;close()V"))
     private void cesium$close(RegionFileStorage instance) throws IOException {
-        if (!this.isCesium) {
+        if (instance != null) {
             instance.close();
         }
     }
@@ -127,11 +120,13 @@ public abstract class MixinIOWorker implements DatabaseSetter, SpecificationSett
 
     @Override
     public void cesium$setStorage(IDBInstance dbInstance) {
-        this.isCesium = true;
         this.database = dbInstance;
 
         try {
-            this.storage.close();
+            if (this.storage != null) {
+                this.storage.close();
+                this.storage = null;
+            }
         } catch (IOException ignored) {
         }
     }
