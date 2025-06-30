@@ -23,7 +23,7 @@
   "mixins": [
     "cesium/mixins/${mixins_file}"
   ],
-  "accesswidener": "cesium/accesswideners/${aw_file}",
+  "accessWidener": "cesium/accesswideners/${aw_file}",
   "depends": {
     "fabricloader": "${v_fabric}",
     "minecraft": "${v_minecraft}"
