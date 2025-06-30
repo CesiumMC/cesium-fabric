@@ -29,11 +29,11 @@ dependencies {
     include(project.property("lib_zstd").toString())
     include(project.property("lib_lmdb").toString())
 
-    include("com.github.jnr:jffi:1.3.12")
-    include("com.github.jnr:jffi:1.3.12:native")
+    include("com.github.jnr:jffi:1.3.13")
+    include("com.github.jnr:jffi:1.3.13:native")
     include("com.github.jnr:jnr-a64asm:1.0.0")
     include("com.github.jnr:jnr-constants:0.10.4")
-    include("com.github.jnr:jnr-ffi:2.2.15")
+    include("com.github.jnr:jnr-ffi:2.2.17")
     include("com.github.jnr:jnr-x86asm:1.0.2")
 }
 
