@@ -2,9 +2,6 @@ package de.yamayaki.cesium.common.lmdb;
 
 import de.yamayaki.cesium.CesiumConfig;
 import de.yamayaki.cesium.api.database.DatabaseSpec;
-import de.yamayaki.cesium.api.database.IDBInstance;
-import de.yamayaki.cesium.api.database.IKVDatabase;
-import de.yamayaki.cesium.api.database.IKVTransaction;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import org.lmdbjava.ByteArrayProxy;
@@ -23,7 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class LMDBInstance implements IDBInstance {
+public class LMDBInstance {
     private final Reference2ObjectMap<DatabaseSpec<?, ?>, KVDatabase<?, ?>> databases = new Reference2ObjectOpenHashMap<>();
     private final Reference2ObjectMap<DatabaseSpec<?, ?>, KVTransaction<?, ?>> transactions = new Reference2ObjectOpenHashMap<>();
 
@@ -62,31 +59,28 @@ public class LMDBInstance implements IDBInstance {
         }
     }
 
-    @Override
     @SuppressWarnings("unchecked")
-    public <K, V> IKVDatabase<K, V> getDatabase(DatabaseSpec<K, V> spec) {
+    public <K, V> KVDatabase<K, V> getDatabase(DatabaseSpec<K, V> spec) {
         KVDatabase<?, ?> database = this.databases.get(spec);
 
         if (database == null) {
             throw new NullPointerException("No database is registered for spec " + spec);
         }
 
-        return (IKVDatabase<K, V>) database;
+        return (KVDatabase<K, V>) database;
     }
 
-    @Override
     @SuppressWarnings("unchecked")
-    public <K, V> IKVTransaction<K, V> getTransaction(DatabaseSpec<K, V> spec) {
+    public <K, V> KVTransaction<K, V> getTransaction(DatabaseSpec<K, V> spec) {
         KVTransaction<?, ?> transaction = this.transactions.get(spec);
 
         if (transaction == null) {
             throw new NullPointerException("No transaction is registered for spec " + spec);
         }
 
-        return (IKVTransaction<K, V>) transaction;
+        return (KVTransaction<K, V>) transaction;
     }
 
-    @Override
     public void flushChanges() {
         if (!this.isDirty) {
             return;
@@ -187,7 +181,6 @@ public class LMDBInstance implements IDBInstance {
         }
     }
 
-    @Override
     public List<Stat> getStats() {
         this.lock.readLock()
                 .lock();
@@ -203,17 +196,14 @@ public class LMDBInstance implements IDBInstance {
 
     }
 
-    @Override
     public ReentrantReadWriteLock getLock() {
         return this.lock;
     }
 
-    @Override
     public boolean closed() {
         return this.env.isClosed();
     }
 
-    @Override
     public void close() {
         this.flushChanges();
 

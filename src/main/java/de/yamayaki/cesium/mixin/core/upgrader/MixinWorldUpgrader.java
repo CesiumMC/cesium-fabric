@@ -6,8 +6,8 @@ import de.yamayaki.cesium.api.accessor.DatabaseActions;
 import de.yamayaki.cesium.api.accessor.DatabaseSetter;
 import de.yamayaki.cesium.api.accessor.SpecificationSetter;
 import de.yamayaki.cesium.api.database.DatabaseSpec;
-import de.yamayaki.cesium.api.database.ICloseableIterator;
-import de.yamayaki.cesium.api.database.IDBInstance;
+import de.yamayaki.cesium.common.lmdb.CursorIterator;
+import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.WorldDatabaseSpecs;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -34,7 +34,7 @@ public abstract class MixinWorldUpgrader {
     //? >= 1.20.6 {
     @Shadow protected abstract boolean processOnePosition(ResourceKey<Level> resourceKey, AutoCloseable autoCloseable, ChunkPos chunkPos);
 
-    @org.spongepowered.asm.mixin.Unique private IDBInstance tmpDatabase;
+    @org.spongepowered.asm.mixin.Unique private LMDBInstance tmpDatabase;
     @org.spongepowered.asm.mixin.Unique private DatabaseSpec<ChunkPos, CompoundTag> tmpSpec;
     @org.spongepowered.asm.mixin.Unique private double chunkCount = 0;
 
@@ -80,7 +80,7 @@ public abstract class MixinWorldUpgrader {
             )
     )
     public <T extends AutoCloseable> void cesiumCreate(CallbackInfoReturnable<List<net.minecraft.util.worldupdate.WorldUpgrader.DimensionToUpgrade<T>>> cir, @Local java.nio.file.Path path, @Local net.minecraft.world.level.chunk.storage.RegionStorageInfo regionStorageInfo, @Local AutoCloseable autoCloseable) {
-        IDBInstance dbInstance = CesiumMod.openWorldDB(path.getParent());
+        LMDBInstance dbInstance = CesiumMod.openWorldDB(path.getParent());
         tmpDatabase = dbInstance;
 
         DatabaseSpec<ChunkPos, CompoundTag> databaseSpec = switch (regionStorageInfo.type()) {
@@ -101,7 +101,7 @@ public abstract class MixinWorldUpgrader {
     public List<net.minecraft.util.worldupdate.WorldUpgrader.FileToUpgrade> cesiumGetChunks(net.minecraft.world.level.chunk.storage.RegionStorageInfo regionStorageInfo, java.nio.file.Path path) {
         final Map<String, List<ChunkPos>> regionList = new HashMap<>();
 
-        try (final ICloseableIterator<ChunkPos> crs = tmpDatabase.getDatabase(tmpSpec).getIterator()) {
+        try (final CursorIterator<ChunkPos> crs = tmpDatabase.getDatabase(tmpSpec).getIterator()) {
             while (crs.hasNext()) {
                 final ChunkPos chunkPos = crs.next();
                 final String regionKey = chunkPos.getRegionX() + "." + chunkPos.getRegionZ();

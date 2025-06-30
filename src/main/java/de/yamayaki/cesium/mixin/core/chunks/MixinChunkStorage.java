@@ -3,7 +3,7 @@ package de.yamayaki.cesium.mixin.core.chunks;
 import de.yamayaki.cesium.api.accessor.DatabaseActions;
 import de.yamayaki.cesium.api.accessor.DatabaseSetter;
 import de.yamayaki.cesium.api.accessor.SpecificationSetter;
-import de.yamayaki.cesium.api.database.IDBInstance;
+import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.WorldDatabaseSpecs;
 import net.minecraft.world.level.chunk.storage.ChunkStorage;
 import net.minecraft.world.level.chunk.storage.IOWorker;
@@ -21,7 +21,7 @@ public class MixinChunkStorage implements DatabaseSetter, DatabaseActions {
     private IOWorker worker;
 
     @Unique
-    private IDBInstance database;
+    private LMDBInstance database;
 
     @Override
     public void cesium$flush() {
@@ -34,7 +34,7 @@ public class MixinChunkStorage implements DatabaseSetter, DatabaseActions {
     }
 
     @Override
-    public void cesium$setStorage(IDBInstance dbInstance) {
+    public void cesium$setStorage(LMDBInstance dbInstance) {
         this.database = dbInstance;
 
         ((DatabaseSetter) this.worker).cesium$setStorage(this.database);

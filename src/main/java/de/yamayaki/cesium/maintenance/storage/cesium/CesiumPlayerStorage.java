@@ -1,8 +1,8 @@
 package de.yamayaki.cesium.maintenance.storage.cesium;
 
 import de.yamayaki.cesium.CesiumMod;
-import de.yamayaki.cesium.api.database.ICloseableIterator;
-import de.yamayaki.cesium.api.database.IDBInstance;
+import de.yamayaki.cesium.common.lmdb.CursorIterator;
+import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.PlayerDatabaseSpecs;
 import de.yamayaki.cesium.maintenance.storage.IPlayerStorage;
 import net.minecraft.nbt.CompoundTag;
@@ -16,7 +16,7 @@ import java.util.UUID;
 
 public class CesiumPlayerStorage implements IPlayerStorage {
     private final Logger logger;
-    private final IDBInstance database;
+    private final LMDBInstance database;
 
     public CesiumPlayerStorage(final Logger logger, final Path basePath) {
         this.logger = logger;
@@ -27,7 +27,7 @@ public class CesiumPlayerStorage implements IPlayerStorage {
     public List<UUID> getAllPlayers() {
         final List<UUID> list = new ArrayList<>();
 
-        try (final ICloseableIterator<UUID> crs = this.database.getDatabase(PlayerDatabaseSpecs.STATISTICS).getIterator()) {
+        try (final CursorIterator<UUID> crs = this.database.getDatabase(PlayerDatabaseSpecs.STATISTICS).getIterator()) {
             while (crs.hasNext()) {
                 list.add(crs.next());
             }

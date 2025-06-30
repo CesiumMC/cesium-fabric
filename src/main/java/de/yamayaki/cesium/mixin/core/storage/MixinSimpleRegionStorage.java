@@ -4,7 +4,7 @@ import de.yamayaki.cesium.api.accessor.DatabaseActions;
 import de.yamayaki.cesium.api.accessor.DatabaseSetter;
 import de.yamayaki.cesium.api.accessor.SpecificationSetter;
 import de.yamayaki.cesium.api.database.DatabaseSpec;
-import de.yamayaki.cesium.api.database.IDBInstance;
+import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import net.minecraft.world.level.chunk.storage.IOWorker;
 
 //? >= 1.20.6 {
@@ -14,7 +14,7 @@ public class MixinSimpleRegionStorage implements DatabaseSetter, SpecificationSe
     /*? >= 1.20.6 {*/ @org.spongepowered.asm.mixin.Shadow @org.spongepowered.asm.mixin.Final /*?}*/ private IOWorker worker;
 
     @Override
-    public void cesium$setStorage(IDBInstance dbInstance) {
+    public void cesium$setStorage(LMDBInstance dbInstance) {
         ((DatabaseSetter) this.worker).cesium$setStorage(dbInstance);
     }
 

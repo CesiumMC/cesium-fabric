@@ -2,7 +2,7 @@ package de.yamayaki.cesium.mixin.core.players;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import de.yamayaki.cesium.api.accessor.DatabaseSetter;
-import de.yamayaki.cesium.api.database.IDBInstance;
+import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.PlayerDatabaseSpecs;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
@@ -19,10 +19,10 @@ import java.nio.file.attribute.FileAttribute;
 
 @Mixin(PlayerDataStorage.class)
 public class MixinPlayerDataStorage implements DatabaseSetter {
-    @Unique private IDBInstance database;
+    @Unique private LMDBInstance database;
 
     @Override
-    public void cesium$setStorage(IDBInstance storage) {
+    public void cesium$setStorage(LMDBInstance storage) {
         this.database = storage;
     }
 

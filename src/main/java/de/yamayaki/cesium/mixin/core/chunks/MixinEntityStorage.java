@@ -3,7 +3,7 @@ package de.yamayaki.cesium.mixin.core.chunks;
 import de.yamayaki.cesium.api.accessor.DatabaseSetter;
 import de.yamayaki.cesium.api.accessor.DatabaseSource;
 import de.yamayaki.cesium.api.accessor.SpecificationSetter;
-import de.yamayaki.cesium.api.database.IDBInstance;
+import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.WorldDatabaseSpecs;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.chunk.storage.EntityStorage;
@@ -30,7 +30,7 @@ public class MixinEntityStorage {
     //?} else {
     /*public void initCesiumEntities(ServerLevel serverLevel, java.nio.file.Path path, com.mojang.datafixers.DataFixer dataFixer, boolean bl, Executor executor, CallbackInfo ci) {
     *///?}
-        IDBInstance storage = ((DatabaseSource) serverLevel).cesium$getStorage();
+        LMDBInstance storage = ((DatabaseSource) serverLevel).cesium$getStorage();
 
         //? >= 1.20.6 {
         ((DatabaseSetter) this.simpleRegionStorage).cesium$setStorage(storage);

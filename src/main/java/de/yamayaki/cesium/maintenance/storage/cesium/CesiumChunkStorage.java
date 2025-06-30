@@ -1,8 +1,8 @@
 package de.yamayaki.cesium.maintenance.storage.cesium;
 
 import de.yamayaki.cesium.CesiumMod;
-import de.yamayaki.cesium.api.database.ICloseableIterator;
-import de.yamayaki.cesium.api.database.IDBInstance;
+import de.yamayaki.cesium.common.lmdb.CursorIterator;
+import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.WorldDatabaseSpecs;
 import de.yamayaki.cesium.maintenance.storage.IChunkStorage;
 import net.minecraft.world.level.ChunkPos;
@@ -15,7 +15,7 @@ import java.util.List;
 
 public class CesiumChunkStorage implements IChunkStorage {
     private final Logger logger;
-    private final IDBInstance database;
+    private final LMDBInstance database;
 
     public CesiumChunkStorage(final Logger logger, final Path basePath) {
         this.logger = logger;
@@ -26,7 +26,7 @@ public class CesiumChunkStorage implements IChunkStorage {
     public List<ChunkPos> getAllChunks() {
         final List<ChunkPos> list = new ArrayList<>();
 
-        try (final ICloseableIterator<ChunkPos> crs = this.database.getDatabase(WorldDatabaseSpecs.CHUNK_DATA).getIterator()) {
+        try (final CursorIterator<ChunkPos> crs = this.database.getDatabase(WorldDatabaseSpecs.CHUNK_DATA).getIterator()) {
             while (crs.hasNext()) {
                 list.add(crs.next());
             }

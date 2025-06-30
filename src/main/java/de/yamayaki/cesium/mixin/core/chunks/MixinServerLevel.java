@@ -2,7 +2,7 @@ package de.yamayaki.cesium.mixin.core.chunks;
 
 import de.yamayaki.cesium.CesiumMod;
 import de.yamayaki.cesium.api.accessor.DatabaseSource;
-import de.yamayaki.cesium.api.database.IDBInstance;
+import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -23,7 +23,7 @@ import java.util.concurrent.Executor;
 @Mixin(ServerLevel.class)
 public class MixinServerLevel implements DatabaseSource {
     @Unique
-    private IDBInstance database;
+    private LMDBInstance database;
 
     @Inject(
             method = "<init>",
@@ -43,7 +43,7 @@ public class MixinServerLevel implements DatabaseSource {
     }
 
     @Override
-    public IDBInstance cesium$getStorage() {
+    public LMDBInstance cesium$getStorage() {
         return this.database;
     }
 }

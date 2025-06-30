@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import de.yamayaki.cesium.api.accessor.DatabaseSetter;
-import de.yamayaki.cesium.api.database.IDBInstance;
+import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.PlayerDatabaseSpecs;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerAdvancements;
@@ -37,7 +37,7 @@ public abstract class MixinPlayerAdvancements implements DatabaseSetter {
     protected abstract void load(ServerAdvancementManager serverAdvancementManager);
 
     @Unique
-    private IDBInstance database;
+    private LMDBInstance database;
 
     @Redirect(
             method = "<init>",
@@ -51,7 +51,7 @@ public abstract class MixinPlayerAdvancements implements DatabaseSetter {
     }
 
     @Override
-    public void cesium$setStorage(IDBInstance storage) {
+    public void cesium$setStorage(LMDBInstance storage) {
         this.database = storage;
 
         MinecraftServer server = this.player.getServer();

@@ -1,12 +1,12 @@
 package de.yamayaki.cesium.common.lmdb;
 
-import de.yamayaki.cesium.api.database.ICloseableIterator;
 import de.yamayaki.cesium.api.io.ISerializer;
 import org.lmdbjava.Cursor;
 
 import java.io.IOException;
+import java.util.Iterator;
 
-public class CursorIterator<K> implements ICloseableIterator<K> {
+public class CursorIterator<K> implements Iterator<K>, AutoCloseable {
     private final Cursor<byte[]> cursor;
     private final ISerializer<K> serializer;
 

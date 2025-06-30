@@ -2,7 +2,6 @@ package de.yamayaki.cesium;
 
 import com.mojang.logging.LogUtils;
 import de.yamayaki.cesium.api.database.DatabaseSpec;
-import de.yamayaki.cesium.api.database.IDBInstance;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.PlayerDatabaseSpecs;
 import de.yamayaki.cesium.common.spec.WorldDatabaseSpecs;
@@ -43,15 +42,15 @@ public class CesiumMod implements ModInitializer {
         }
     }
 
-    public static @NotNull IDBInstance openWorldDB(@NotNull final Path dimensionPath) {
+    public static @NotNull LMDBInstance openWorldDB(@NotNull final Path dimensionPath) {
         return openDB(dimensionPath, "chunks", worldSpecs);
     }
 
-    public static @NotNull IDBInstance openPlayerDB(@NotNull final Path worldPath) {
+    public static @NotNull LMDBInstance openPlayerDB(@NotNull final Path worldPath) {
         return openDB(worldPath, "players", playerSpecs);
     }
 
-    private static @NotNull IDBInstance openDB(@NotNull final Path dbBasePath, @NotNull final String dbName, @NotNull final DatabaseSpec<?, ?>[] dbSpecs) {
+    private static @NotNull LMDBInstance openDB(@NotNull final Path dbBasePath, @NotNull final String dbName, @NotNull final DatabaseSpec<?, ?>[] dbSpecs) {
         FileHelper.ensureDirectory(dbBasePath);
         return new LMDBInstance(dbBasePath.resolve(dbName + getFileEnding()), dbSpecs, cesiumLogger, config());
     }

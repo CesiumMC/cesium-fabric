@@ -1,8 +1,6 @@
 package de.yamayaki.cesium.common.lmdb;
 
 import de.yamayaki.cesium.api.database.DatabaseSpec;
-import de.yamayaki.cesium.api.database.ICloseableIterator;
-import de.yamayaki.cesium.api.database.IKVDatabase;
 import de.yamayaki.cesium.api.io.ICompressor;
 import de.yamayaki.cesium.api.io.IScannable;
 import de.yamayaki.cesium.api.io.ISerializer;
@@ -18,7 +16,7 @@ import org.lmdbjava.Txn;
 import java.io.IOException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class KVDatabase<K, V> implements IKVDatabase<K, V> {
+public class KVDatabase<K, V> {
     private final LMDBInstance storage;
 
     private final Env<byte[]> env;
@@ -41,7 +39,6 @@ public class KVDatabase<K, V> implements IKVDatabase<K, V> {
         this.compressor = compressed ? DefaultCompressors.ZSTD : DefaultCompressors.NONE;
     }
 
-    @Override
     public V getValue(K key) {
         byte[] buf = this.getBytes(key);
 
@@ -56,7 +53,6 @@ public class KVDatabase<K, V> implements IKVDatabase<K, V> {
         }
     }
 
-    @Override
     public byte[] getBytes(final K key) {
         ReentrantReadWriteLock lock = this.storage.getLock();
         byte[] buf;
@@ -87,7 +83,6 @@ public class KVDatabase<K, V> implements IKVDatabase<K, V> {
     }
 
     //idea by https://github.com/mo0dss/radon-fabric
-    @Override
     @SuppressWarnings("unchecked")
     public <T> void scan(K key, T scanner) {
         if (!(this.valueSerializer instanceof IScannable<?>)) {
@@ -111,17 +106,14 @@ public class KVDatabase<K, V> implements IKVDatabase<K, V> {
         this.storage.isDirty = true;
     }
 
-    @Override
     public ISerializer<K> getKeySerializer() {
         return this.keySerializer;
     }
 
-    @Override
     public ISerializer<V> getValueSerializer() {
         return this.valueSerializer;
     }
 
-    @Override
     public ICompressor getCompressor() {
         return this.compressor;
     }
@@ -142,8 +134,7 @@ public class KVDatabase<K, V> implements IKVDatabase<K, V> {
         }
     }
 
-    @Override
-    public ICloseableIterator<K> getIterator() {
+    public CursorIterator<K> getIterator() {
         final Cursor<byte[]> cursor = this.dbi.openCursor(this.env.txnRead());
         return new CursorIterator<>(cursor, this.keySerializer);
     }
@@ -151,7 +142,6 @@ public class KVDatabase<K, V> implements IKVDatabase<K, V> {
     public Stat getStats() {
         return this.dbi.stat(this.env.txnRead());
     }
-
 
     public void close() {
         this.dbi.close();

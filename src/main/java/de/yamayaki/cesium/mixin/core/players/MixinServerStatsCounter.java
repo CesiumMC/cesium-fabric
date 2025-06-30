@@ -3,7 +3,7 @@ package de.yamayaki.cesium.mixin.core.players;
 import com.google.gson.JsonParseException;
 import com.mojang.datafixers.DataFixer;
 import de.yamayaki.cesium.api.accessor.DatabaseSetter;
-import de.yamayaki.cesium.api.database.IDBInstance;
+import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.PlayerDatabaseSpecs;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.stats.ServerStatsCounter;
@@ -37,7 +37,7 @@ public abstract class MixinServerStatsCounter extends StatsCounter implements Da
     public abstract void parseLocal(DataFixer dataFixer, String string);
 
     @Unique
-    private IDBInstance database;
+    private LMDBInstance database;
 
     @Redirect(
             method = "<init>",
@@ -56,7 +56,7 @@ public abstract class MixinServerStatsCounter extends StatsCounter implements Da
     }
 
     @Override
-    public void cesium$setStorage(IDBInstance storage) {
+    public void cesium$setStorage(LMDBInstance storage) {
         this.database = storage;
 
         String json = this.database

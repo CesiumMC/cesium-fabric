@@ -1,7 +1,7 @@
 package de.yamayaki.cesium.maintenance.tasks;
 
 import de.yamayaki.cesium.CesiumMod;
-import de.yamayaki.cesium.api.database.IDBInstance;
+import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.maintenance.AbstractTask;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
@@ -37,7 +37,7 @@ public class DatabaseCompact extends AbstractTask {
         final Path originalPath = dimensionPath.resolve("chunks" + CesiumMod.getFileEnding());
         final Path copyPath = dimensionPath.resolve("chunks.copy");
 
-        final IDBInstance dbInstance = CesiumMod.openWorldDB(dimensionPath);
+        final LMDBInstance dbInstance = CesiumMod.openWorldDB(dimensionPath);
 
         this.status.set("Compacting level data for " + level.location().getPath());
 

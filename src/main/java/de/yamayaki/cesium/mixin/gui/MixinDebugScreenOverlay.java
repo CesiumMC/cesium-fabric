@@ -3,7 +3,7 @@ package de.yamayaki.cesium.mixin.gui;
 import com.llamalad7.mixinextras.sugar.Local;
 import de.yamayaki.cesium.CesiumMod;
 import de.yamayaki.cesium.api.accessor.DatabaseSource;
-import de.yamayaki.cesium.api.database.IDBInstance;
+import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.resources.ResourceKey;
@@ -41,7 +41,7 @@ public class MixinDebugScreenOverlay {
             return;
         }
 
-        final IDBInstance dbInstance = ((DatabaseSource) serverLevel)
+        final LMDBInstance dbInstance = ((DatabaseSource) serverLevel)
                 .cesium$getStorage();
         final List<Stat> stats = dbInstance.getStats();
 
