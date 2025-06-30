@@ -20,13 +20,13 @@ import java.util.concurrent.Executor;
 public class MixinEntityStorage {
     //? >= 1.20.6 {
     @Shadow @Final private net.minecraft.world.level.chunk.storage.SimpleRegionStorage simpleRegionStorage;
-     //?} else {
+    //?} else {
     /*@Shadow @Final private net.minecraft.world.level.chunk.storage.IOWorker worker;
     *///?}
 
     @Inject(method = "<init>", at = @At("RETURN"))
     //? >= 1.20.6 {
-     public void initCesiumEntities(net.minecraft.world.level.chunk.storage.SimpleRegionStorage simpleRegionStorage, ServerLevel serverLevel, Executor executor, CallbackInfo ci) {
+    public void initCesiumEntities(net.minecraft.world.level.chunk.storage.SimpleRegionStorage simpleRegionStorage, ServerLevel serverLevel, Executor executor, CallbackInfo ci) {
     //?} else {
     /*public void initCesiumEntities(ServerLevel serverLevel, java.nio.file.Path path, com.mojang.datafixers.DataFixer dataFixer, boolean bl, Executor executor, CallbackInfo ci) {
     *///?}

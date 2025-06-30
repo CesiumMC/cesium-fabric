@@ -4,12 +4,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import de.yamayaki.cesium.CesiumMod;
 import de.yamayaki.cesium.api.accessor.DatabaseActions;
 import de.yamayaki.cesium.api.accessor.DatabaseSetter;
-import de.yamayaki.cesium.api.accessor.SpecificationSetter;
-import de.yamayaki.cesium.api.database.DatabaseSpec;
-import de.yamayaki.cesium.common.lmdb.CursorIterator;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
-import de.yamayaki.cesium.common.spec.WorldDatabaseSpecs;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -18,10 +13,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +27,7 @@ public abstract class MixinWorldUpgrader {
     @Shadow protected abstract boolean processOnePosition(ResourceKey<Level> resourceKey, AutoCloseable autoCloseable, ChunkPos chunkPos);
 
     @org.spongepowered.asm.mixin.Unique private LMDBInstance tmpDatabase;
-    @org.spongepowered.asm.mixin.Unique private DatabaseSpec<ChunkPos, CompoundTag> tmpSpec;
+    @org.spongepowered.asm.mixin.Unique private de.yamayaki.cesium.api.database.DatabaseSpec<ChunkPos, net.minecraft.nbt.CompoundTag> tmpSpec;
     @org.spongepowered.asm.mixin.Unique private double chunkCount = 0;
 
     @Redirect(
@@ -79,35 +71,35 @@ public abstract class MixinWorldUpgrader {
                     shift = At.Shift.BY
             )
     )
-    public <T extends AutoCloseable> void cesiumCreate(CallbackInfoReturnable<List<net.minecraft.util.worldupdate.WorldUpgrader.DimensionToUpgrade<T>>> cir, @Local java.nio.file.Path path, @Local net.minecraft.world.level.chunk.storage.RegionStorageInfo regionStorageInfo, @Local AutoCloseable autoCloseable) {
+    public <T extends AutoCloseable> void cesiumCreate(org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<List<net.minecraft.util.worldupdate.WorldUpgrader.DimensionToUpgrade<T>>> cir, @Local java.nio.file.Path path, @Local net.minecraft.world.level.chunk.storage.RegionStorageInfo regionStorageInfo, @Local AutoCloseable autoCloseable) {
         LMDBInstance dbInstance = CesiumMod.openWorldDB(path.getParent());
         tmpDatabase = dbInstance;
 
-        DatabaseSpec<ChunkPos, CompoundTag> databaseSpec = switch (regionStorageInfo.type()) {
-            case "entities" -> WorldDatabaseSpecs.ENTITY;
-            case "poi" -> WorldDatabaseSpecs.POI;
-            case "chunk" -> WorldDatabaseSpecs.CHUNK_DATA;
+        de.yamayaki.cesium.api.database.DatabaseSpec<ChunkPos, net.minecraft.nbt.CompoundTag> databaseSpec = switch (regionStorageInfo.type()) {
+            case "entities" -> de.yamayaki.cesium.common.spec.WorldDatabaseSpecs.ENTITY;
+            case "poi" -> de.yamayaki.cesium.common.spec.WorldDatabaseSpecs.POI;
+            case "chunk" -> de.yamayaki.cesium.common.spec.WorldDatabaseSpecs.CHUNK_DATA;
             default -> throw new IllegalStateException("Unexpected value: " + regionStorageInfo.type());
         };
         tmpSpec = databaseSpec;
 
         ((DatabaseSetter) autoCloseable).cesium$setStorage(dbInstance);
-        if (autoCloseable instanceof SpecificationSetter) {
-            ((SpecificationSetter) autoCloseable).cesium$setSpec(databaseSpec);
+        if (autoCloseable instanceof de.yamayaki.cesium.api.accessor.SpecificationSetter) {
+            ((de.yamayaki.cesium.api.accessor.SpecificationSetter) autoCloseable).cesium$setSpec(databaseSpec);
         }
     }
 
     @Redirect(method = "getFilesToProcess", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/worldupdate/WorldUpgrader$AbstractUpgrader;getAllChunkPositions(Lnet/minecraft/world/level/chunk/storage/RegionStorageInfo;Ljava/nio/file/Path;)Ljava/util/List;"))
     public List<net.minecraft.util.worldupdate.WorldUpgrader.FileToUpgrade> cesiumGetChunks(net.minecraft.world.level.chunk.storage.RegionStorageInfo regionStorageInfo, java.nio.file.Path path) {
-        final Map<String, List<ChunkPos>> regionList = new HashMap<>();
+        final Map<String, List<ChunkPos>> regionList = new java.util.HashMap<>();
 
-        try (final CursorIterator<ChunkPos> crs = tmpDatabase.getDatabase(tmpSpec).getIterator()) {
+        try (final de.yamayaki.cesium.common.lmdb.CursorIterator<ChunkPos> crs = tmpDatabase.getDatabase(tmpSpec).getIterator()) {
             while (crs.hasNext()) {
                 final ChunkPos chunkPos = crs.next();
                 final String regionKey = chunkPos.getRegionX() + "." + chunkPos.getRegionZ();
 
                 if (!regionList.containsKey(regionKey)) {
-                    regionList.put(regionKey, new ArrayList<>());
+                    regionList.put(regionKey, new java.util.ArrayList<>());
                 }
 
                 regionList.get(regionKey).add(chunkPos);
@@ -123,10 +115,16 @@ public abstract class MixinWorldUpgrader {
     }
      
     //?} else {
-    /*@Shadow @org.spongepowered.asm.mixin.Final private net.minecraft.world.level.storage.LevelStorageSource.LevelStorageAccess levelStorage;
-    @Shadow private volatile int converted;
-    @Shadow private volatile int skipped;
-    @Shadow @org.spongepowered.asm.mixin.Final private static org.slf4j.Logger LOGGER;
+    /*@Shadow
+    @org.spongepowered.asm.mixin.Final
+    private net.minecraft.world.level.storage.LevelStorageSource.LevelStorageAccess levelStorage;
+    @Shadow
+    private volatile int converted;
+    @Shadow
+    private volatile int skipped;
+    @Shadow
+    @org.spongepowered.asm.mixin.Final
+    private static org.slf4j.Logger LOGGER;
 
     @Redirect(
             method = "work",
@@ -140,7 +138,7 @@ public abstract class MixinWorldUpgrader {
         com.google.common.collect.ImmutableMap<ResourceKey<Level>, net.minecraft.world.level.chunk.storage.ChunkStorage> chunkStorageMap = instance.build();
 
         for (Map.Entry<ResourceKey<Level>, net.minecraft.world.level.chunk.storage.ChunkStorage> resourceKeyChunkStorageEntry : chunkStorageMap.entrySet()) {
-            final IDBInstance database = CesiumMod.openWorldDB(this.levelStorage.getDimensionPath(resourceKeyChunkStorageEntry.getKey()));
+            final LMDBInstance database = CesiumMod.openWorldDB(this.levelStorage.getDimensionPath(resourceKeyChunkStorageEntry.getKey()));
 
             ((DatabaseSetter) resourceKeyChunkStorageEntry.getValue()).cesium$setStorage(database);
         }

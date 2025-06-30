@@ -14,7 +14,7 @@ public class MixinSectionStorage<R> implements DatabaseSetter {
     //? >= 1.20.6 {
     @Shadow @Final private net.minecraft.world.level.chunk.storage.SimpleRegionStorage simpleRegionStorage;
     //?} else {
-     /*@Shadow @Final private net.minecraft.world.level.chunk.storage.IOWorker worker;
+    /*@Shadow @Final private net.minecraft.world.level.chunk.storage.IOWorker worker;
     *///?}
 
     @Override

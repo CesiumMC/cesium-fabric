@@ -9,9 +9,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
-//? if >= 1.21.5 {
-import net.minecraft.world.level.TicketStorage;
-//?}
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.level.entity.ChunkStatusUpdateListener;
@@ -34,7 +31,7 @@ public class MixinChunkMap {
     private PoiManager poiManager;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void setCesiumDB(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureTemplateManager structureTemplateManager, Executor executor, BlockableEventLoop blockableEventLoop, LightChunkGetter lightChunkGetter, ChunkGenerator chunkGenerator, ChunkProgressListener chunkProgressListener, ChunkStatusUpdateListener chunkStatusUpdateListener, Supplier supplier,/*? if >= 1.21.5 {*/TicketStorage ticketStorage, /*?}*/ int i, boolean bl, CallbackInfo ci) {
+    private void setCesiumDB(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureTemplateManager structureTemplateManager, Executor executor, BlockableEventLoop blockableEventLoop, LightChunkGetter lightChunkGetter, ChunkGenerator chunkGenerator, ChunkProgressListener chunkProgressListener, ChunkStatusUpdateListener chunkStatusUpdateListener, Supplier supplier,/*? if >= 1.21.5 {*/net.minecraft.world.level.TicketStorage ticketStorage, /*?}*/ int i, boolean bl, CallbackInfo ci) {
         LMDBInstance database = ((DatabaseSource) serverLevel).cesium$getStorage();
 
         ((DatabaseSetter) this.poiManager)

@@ -52,7 +52,7 @@ public class CesiumTasksScreen extends Screen {
         layout.addChild(this.taskButton("Anvil → Cesium", AbstractTask.Task.TO_CESIUM));
         layout.addChild(this.taskButton("Cesium → Anvil", AbstractTask.Task.TO_ANVIL));
 
-        if(FabricLoader.getInstance().isDevelopmentEnvironment()) {
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             layout.addChild(this.taskButton("Compact Database", AbstractTask.Task.COMPACT));
         }
 

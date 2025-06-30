@@ -5,7 +5,6 @@ import de.yamayaki.cesium.api.accessor.DatabaseSetter;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.PlayerDatabaseSpecs;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,8 +13,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
 
 @Mixin(PlayerDataStorage.class)
 public class MixinPlayerDataStorage implements DatabaseSetter {
@@ -75,10 +72,18 @@ public class MixinPlayerDataStorage implements DatabaseSetter {
             *///?}
             at = @At(
                     value = "INVOKE",
+                    //? >= 1.20.4 {
                     target = "Lnet/minecraft/nbt/NbtIo;readCompressed(Ljava/nio/file/Path;Lnet/minecraft/nbt/NbtAccounter;)Lnet/minecraft/nbt/CompoundTag;"
+                    //?} else {
+                    /*target = "Lnet/minecraft/nbt/NbtIo;readCompressed(Ljava/io/File;)Lnet/minecraft/nbt/CompoundTag;"
+                    *///?}
             )
     )
-    public CompoundTag redirectPlayerLoad(Path path, NbtAccounter nbtAccounter, @Local(argsOnly = true) Player player) {
+    //? >= 1.20.4 {
+    public CompoundTag redirectPlayerLoad(java.nio.file.Path path, net.minecraft.nbt.NbtAccounter nbtAccounter, @Local(argsOnly = true) Player player) {
+    //?} else {
+    /*public CompoundTag redirectPlayerLoad(File file, @Local(argsOnly = true) Player player) {
+    *///?}
         return this.database
                 .getDatabase(PlayerDatabaseSpecs.PLAYER_DATA)
                 .getValue(player.getUUID());
@@ -88,10 +93,18 @@ public class MixinPlayerDataStorage implements DatabaseSetter {
             method = "save",
             at = @At(
                     value = "INVOKE",
+                    //? >= 1.20.4 {
                     target = "Ljava/nio/file/Files;createTempFile(Ljava/nio/file/Path;Ljava/lang/String;Ljava/lang/String;[Ljava/nio/file/attribute/FileAttribute;)Ljava/nio/file/Path;"
+                    //?} else {
+                    /*target = "Ljava/io/File;createTempFile(Ljava/lang/String;Ljava/lang/String;Ljava/io/File;)Ljava/io/File;"
+                    *///?}
             )
     )
-    public Path disableFileCreation(Path path, String a, String b, FileAttribute[] fileAttributes) {
+    //? >= 1.20.4 {
+    public java.nio.file.Path disableFileCreation(java.nio.file.Path path, String a, String b, java.nio.file.attribute.FileAttribute<?>[] fileAttributes) {
+    //?} else {
+    /*public File disableFileCreation(String se, String prefix, File suffix) {
+    *///?}
         return null;
     }
 
@@ -99,10 +112,18 @@ public class MixinPlayerDataStorage implements DatabaseSetter {
             method = "save",
             at = @At(
                     value = "INVOKE",
+                    //? >= 1.20.4 {
                     target = "Lnet/minecraft/nbt/NbtIo;writeCompressed(Lnet/minecraft/nbt/CompoundTag;Ljava/nio/file/Path;)V"
+                    //?} else {
+                    /*target = "Lnet/minecraft/nbt/NbtIo;writeCompressed(Lnet/minecraft/nbt/CompoundTag;Ljava/io/File;)V"
+                    *///?}
             )
     )
-    public void redirectWrite(CompoundTag compoundTag, Path path, @Local(argsOnly = true) Player player) {
+    //? >= 1.20.4 {
+    public void redirectWrite(CompoundTag compoundTag, java.nio.file.Path path, @Local(argsOnly = true) Player player) {
+    //?} else {
+    /*public void redirectWrite(CompoundTag compoundTag, File file, @Local(argsOnly = true) Player player) {
+    *///?}
         this.database
                 .getTransaction(PlayerDatabaseSpecs.PLAYER_DATA)
                 .add(player.getUUID(), compoundTag);
@@ -112,10 +133,18 @@ public class MixinPlayerDataStorage implements DatabaseSetter {
             method = "save",
             at = @At(
                     value = "INVOKE",
+                    //? >= 1.20.4 {
                     target = "Lnet/minecraft/Util;safeReplaceFile(Ljava/nio/file/Path;Ljava/nio/file/Path;Ljava/nio/file/Path;)V"
+                    //?} else {
+                    /*target = "Lnet/minecraft/Util;safeReplaceFile(Ljava/io/File;Ljava/io/File;Ljava/io/File;)V"
+                    *///?}
             )
     )
-    public void disableFileMove(Path path, Path path2, Path path3) {
+    //? >=1.20.4 {
+    public void disableFileMove(java.nio.file.Path path, java.nio.file.Path path2, java.nio.file.Path path3) {
+    //?} else {
+    /*public void disableFileMove(File file, File file2, File file3) {
+    *///?}
         // Do nothing
     }
 }

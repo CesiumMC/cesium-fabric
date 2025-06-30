@@ -13,16 +13,12 @@ import net.minecraft.world.level.chunk.storage.RegionFileStorage;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.io.IOException;
-import java.nio.file.Path;
 
 @Mixin(IOWorker.class)
 public abstract class MixinIOWorker implements DatabaseSetter, SpecificationSetter, DatabaseActions {
@@ -34,8 +30,8 @@ public abstract class MixinIOWorker implements DatabaseSetter, SpecificationSett
     @Unique private net.minecraft.world.level.chunk.storage.RegionStorageInfo storageInfo;
 
 
-    @Inject(method = "<init>", at = @At("TAIL"))
-    public void storeStorageInfo(net.minecraft.world.level.chunk.storage.RegionStorageInfo regionStorageInfo, Path path, boolean bl, CallbackInfo ci) {
+    @org.spongepowered.asm.mixin.injection.Inject(method = "<init>", at = @At("TAIL"))
+    public void storeStorageInfo(net.minecraft.world.level.chunk.storage.RegionStorageInfo regionStorageInfo, java.nio.file.Path path, boolean bl, org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
         this.storageInfo = regionStorageInfo;
     }
 
@@ -43,11 +39,11 @@ public abstract class MixinIOWorker implements DatabaseSetter, SpecificationSett
      * @author Yamayaki
      * @reason Return from field.
      */
-    @Overwrite
+    @org.spongepowered.asm.mixin.Overwrite
     public net.minecraft.world.level.chunk.storage.RegionStorageInfo storageInfo() {
         return this.storageInfo;
     }
-    //? }
+    //?}
 
     /**
      * @author Yamayaki
