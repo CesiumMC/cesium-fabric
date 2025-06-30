@@ -30,7 +30,6 @@
   },
   "breaks": {
     "moonrise": "*",
-    "c2me-rewrites-chunkio": "*",
-    "c2me-rewrites-chunk-serializer": "*"
+    "c2me": "*"
   }
 }
