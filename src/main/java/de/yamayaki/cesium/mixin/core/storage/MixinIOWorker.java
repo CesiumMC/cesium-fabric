@@ -26,7 +26,7 @@ public abstract class MixinIOWorker implements DatabaseSetter, SpecificationSett
 
     @Unique private LMDBInstance database;
     @Unique private DatabaseSpec<ChunkPos, CompoundTag> databaseSpec;
-    //? >= 1.20.6 {
+    //? >= 1.21.1 {
     @Unique private net.minecraft.world.level.chunk.storage.RegionStorageInfo storageInfo;
 
 
