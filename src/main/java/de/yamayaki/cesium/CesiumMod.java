@@ -1,7 +1,7 @@
 package de.yamayaki.cesium;
 
 import com.mojang.logging.LogUtils;
-import de.yamayaki.cesium.api.database.DatabaseSpec;
+import de.yamayaki.cesium.common.DatabaseSpec;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.PlayerDatabaseSpecs;
 import de.yamayaki.cesium.common.spec.WorldDatabaseSpecs;

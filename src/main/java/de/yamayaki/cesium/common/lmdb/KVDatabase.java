@@ -1,6 +1,6 @@
 package de.yamayaki.cesium.common.lmdb;
 
-import de.yamayaki.cesium.api.database.DatabaseSpec;
+import de.yamayaki.cesium.common.DatabaseSpec;
 import de.yamayaki.cesium.api.io.ICompressor;
 import de.yamayaki.cesium.api.io.IScannable;
 import de.yamayaki.cesium.api.io.ISerializer;
@@ -37,10 +37,10 @@ public class KVDatabase<K, V> {
         this.storage = storage;
 
         this.env = this.storage.env;
-        this.dbi = this.env.openDbi(spec.getName(), DbiFlags.MDB_CREATE);
+        this.dbi = this.env.openDbi(spec.name(), DbiFlags.MDB_CREATE);
 
-        this.keySerializer = DefaultSerializers.getSerializer(spec.getKeyType());
-        this.valueSerializer = DefaultSerializers.getSerializer(spec.getValueType());
+        this.keySerializer = DefaultSerializers.getSerializer(spec.key());
+        this.valueSerializer = DefaultSerializers.getSerializer(spec.value());
 
         this.compressor = isUncompressed ? DefaultCompressors.NONE : DefaultCompressors.ZSTD;
     }

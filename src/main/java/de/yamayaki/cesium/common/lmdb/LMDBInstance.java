@@ -1,6 +1,6 @@
 package de.yamayaki.cesium.common.lmdb;
 
-import de.yamayaki.cesium.api.database.DatabaseSpec;
+import de.yamayaki.cesium.common.DatabaseSpec;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import org.lmdbjava.ByteArrayProxy;
@@ -36,7 +36,7 @@ public class LMDBInstance {
                 .setMaxDbs(databases.length)
                 .open(databasePath.toFile(), EnvFlags.MDB_NOLOCK, EnvFlags.MDB_NOSUBDIR);
 
-        this.resizeStep = Arrays.stream(databases).mapToLong(DatabaseSpec::getInitialSize).sum();
+        this.resizeStep = Arrays.stream(databases).mapToLong(DatabaseSpec::initialSize).sum();
 
         if (this.env.info().mapSize < this.resizeStep) {
             this.env.setMapSize(this.resizeStep);

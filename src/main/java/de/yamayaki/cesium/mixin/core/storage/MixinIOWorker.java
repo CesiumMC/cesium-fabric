@@ -3,7 +3,7 @@ package de.yamayaki.cesium.mixin.core.storage;
 import de.yamayaki.cesium.api.accessor.DatabaseActions;
 import de.yamayaki.cesium.api.accessor.DatabaseSetter;
 import de.yamayaki.cesium.api.accessor.SpecificationSetter;
-import de.yamayaki.cesium.api.database.DatabaseSpec;
+import de.yamayaki.cesium.common.DatabaseSpec;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StreamTagVisitor;

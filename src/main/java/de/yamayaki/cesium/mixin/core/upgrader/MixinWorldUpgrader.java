@@ -27,7 +27,7 @@ public abstract class MixinWorldUpgrader {
     @Shadow protected abstract boolean processOnePosition(ResourceKey<Level> resourceKey, AutoCloseable autoCloseable, ChunkPos chunkPos);
 
     @org.spongepowered.asm.mixin.Unique private LMDBInstance tmpDatabase;
-    @org.spongepowered.asm.mixin.Unique private de.yamayaki.cesium.api.database.DatabaseSpec<ChunkPos, net.minecraft.nbt.CompoundTag> tmpSpec;
+    @org.spongepowered.asm.mixin.Unique private de.yamayaki.cesium.common.DatabaseSpec<ChunkPos, net.minecraft.nbt.CompoundTag> tmpSpec;
     @org.spongepowered.asm.mixin.Unique private double chunkCount = 0;
 
     @Redirect(
@@ -75,7 +75,7 @@ public abstract class MixinWorldUpgrader {
         LMDBInstance dbInstance = CesiumMod.openWorldDB(path.getParent());
         tmpDatabase = dbInstance;
 
-        de.yamayaki.cesium.api.database.DatabaseSpec<ChunkPos, net.minecraft.nbt.CompoundTag> databaseSpec = switch (regionStorageInfo.type()) {
+        de.yamayaki.cesium.common.DatabaseSpec<ChunkPos, net.minecraft.nbt.CompoundTag> databaseSpec = switch (regionStorageInfo.type()) {
             case "entities" -> de.yamayaki.cesium.common.spec.WorldDatabaseSpecs.ENTITY;
             case "poi" -> de.yamayaki.cesium.common.spec.WorldDatabaseSpecs.POI;
             case "chunk" -> de.yamayaki.cesium.common.spec.WorldDatabaseSpecs.CHUNK_DATA;

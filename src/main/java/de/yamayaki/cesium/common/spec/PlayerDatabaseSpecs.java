@@ -1,6 +1,6 @@
 package de.yamayaki.cesium.common.spec;
 
-import de.yamayaki.cesium.api.database.DatabaseSpec;
+import de.yamayaki.cesium.common.DatabaseSpec;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.UUID;
