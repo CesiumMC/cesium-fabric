@@ -1,7 +1,7 @@
 package de.yamayaki.cesium.maintenance.storage.anvil;
 
 import com.google.common.collect.ImmutableList;
-import de.yamayaki.cesium.api.accessor.RawAccess;
+import de.yamayaki.cesium.accessor.RawAccess;
 import de.yamayaki.cesium.maintenance.storage.IChunkStorage;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.storage.RegionFileStorage;

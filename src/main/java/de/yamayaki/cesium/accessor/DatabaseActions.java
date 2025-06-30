@@ -1,4 +1,4 @@
-package de.yamayaki.cesium.api.accessor;
+package de.yamayaki.cesium.accessor;
 
 public interface DatabaseActions {
     void cesium$flush();

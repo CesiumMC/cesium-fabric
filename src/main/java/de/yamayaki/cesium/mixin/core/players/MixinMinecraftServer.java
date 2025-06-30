@@ -1,6 +1,6 @@
 package de.yamayaki.cesium.mixin.core.players;
 
-import de.yamayaki.cesium.api.accessor.DatabaseSource;
+import de.yamayaki.cesium.accessor.DatabaseSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.PlayerList;
 import org.spongepowered.asm.mixin.Mixin;

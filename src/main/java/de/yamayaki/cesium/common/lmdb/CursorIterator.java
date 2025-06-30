@@ -1,6 +1,6 @@
 package de.yamayaki.cesium.common.lmdb;
 
-import de.yamayaki.cesium.api.io.ISerializer;
+import de.yamayaki.cesium.api.ISerializer;
 import org.lmdbjava.Cursor;
 
 import java.io.IOException;

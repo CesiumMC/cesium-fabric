@@ -1,8 +1,8 @@
 package de.yamayaki.cesium.mixin.core.chunks;
 
 import com.mojang.datafixers.DataFixer;
-import de.yamayaki.cesium.api.accessor.DatabaseSetter;
-import de.yamayaki.cesium.api.accessor.DatabaseSource;
+import de.yamayaki.cesium.accessor.DatabaseSetter;
+import de.yamayaki.cesium.accessor.DatabaseSource;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;

@@ -1,6 +1,6 @@
 package de.yamayaki.cesium.common;
 
-import de.yamayaki.cesium.api.io.ICompressor;
+import de.yamayaki.cesium.api.ICompressor;
 import de.yamayaki.cesium.common.zstd.ZSTDCompressor;
 
 public class DefaultCompressors {

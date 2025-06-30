@@ -1,8 +1,8 @@
 package de.yamayaki.cesium.mixin.core.storage;
 
-import de.yamayaki.cesium.api.accessor.DatabaseActions;
-import de.yamayaki.cesium.api.accessor.DatabaseSetter;
-import de.yamayaki.cesium.api.accessor.SpecificationSetter;
+import de.yamayaki.cesium.accessor.DatabaseActions;
+import de.yamayaki.cesium.accessor.DatabaseSetter;
+import de.yamayaki.cesium.accessor.SpecificationSetter;
 import de.yamayaki.cesium.common.DatabaseSpec;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import net.minecraft.world.level.chunk.storage.IOWorker;

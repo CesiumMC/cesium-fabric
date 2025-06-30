@@ -1,4 +1,4 @@
-package de.yamayaki.cesium.api.io;
+package de.yamayaki.cesium.api;
 
 public interface ICompressor {
     byte[] compress(final byte[] input);

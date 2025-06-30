@@ -4,7 +4,7 @@ import com.github.luben.zstd.Zstd;
 import com.github.luben.zstd.ZstdCompressCtx;
 import com.github.luben.zstd.ZstdDecompressCtx;
 import de.yamayaki.cesium.CesiumMod;
-import de.yamayaki.cesium.api.io.ICompressor;
+import de.yamayaki.cesium.api.ICompressor;
 
 import java.util.Arrays;
 

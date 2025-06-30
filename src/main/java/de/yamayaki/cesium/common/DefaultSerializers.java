@@ -1,6 +1,6 @@
 package de.yamayaki.cesium.common;
 
-import de.yamayaki.cesium.api.io.ISerializer;
+import de.yamayaki.cesium.api.ISerializer;
 import de.yamayaki.cesium.common.serializer.ChunkPosSerializer;
 import de.yamayaki.cesium.common.serializer.CompoundTagSerializer;
 import de.yamayaki.cesium.common.serializer.StringSerializer;

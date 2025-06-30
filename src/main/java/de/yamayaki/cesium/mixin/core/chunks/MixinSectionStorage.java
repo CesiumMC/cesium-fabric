@@ -1,7 +1,7 @@
 package de.yamayaki.cesium.mixin.core.chunks;
 
-import de.yamayaki.cesium.api.accessor.DatabaseSetter;
-import de.yamayaki.cesium.api.accessor.SpecificationSetter;
+import de.yamayaki.cesium.accessor.DatabaseSetter;
+import de.yamayaki.cesium.accessor.SpecificationSetter;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.WorldDatabaseSpecs;
 import net.minecraft.world.level.chunk.storage.SectionStorage;

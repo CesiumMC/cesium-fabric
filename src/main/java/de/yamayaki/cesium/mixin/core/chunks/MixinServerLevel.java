@@ -1,7 +1,7 @@
 package de.yamayaki.cesium.mixin.core.chunks;
 
 import de.yamayaki.cesium.CesiumMod;
-import de.yamayaki.cesium.api.accessor.DatabaseSource;
+import de.yamayaki.cesium.accessor.DatabaseSource;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;

@@ -2,8 +2,8 @@ package de.yamayaki.cesium.mixin.core.upgrader;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import de.yamayaki.cesium.CesiumMod;
-import de.yamayaki.cesium.api.accessor.DatabaseActions;
-import de.yamayaki.cesium.api.accessor.DatabaseSetter;
+import de.yamayaki.cesium.accessor.DatabaseActions;
+import de.yamayaki.cesium.accessor.DatabaseSetter;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
@@ -84,8 +84,8 @@ public abstract class MixinWorldUpgrader {
         tmpSpec = databaseSpec;
 
         ((DatabaseSetter) autoCloseable).cesium$setStorage(dbInstance);
-        if (autoCloseable instanceof de.yamayaki.cesium.api.accessor.SpecificationSetter) {
-            ((de.yamayaki.cesium.api.accessor.SpecificationSetter) autoCloseable).cesium$setSpec(databaseSpec);
+        if (autoCloseable instanceof de.yamayaki.cesium.accessor.SpecificationSetter) {
+            ((de.yamayaki.cesium.accessor.SpecificationSetter) autoCloseable).cesium$setSpec(databaseSpec);
         }
     }
 

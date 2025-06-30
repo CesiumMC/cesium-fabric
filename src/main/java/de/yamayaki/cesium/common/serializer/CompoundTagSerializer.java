@@ -2,8 +2,8 @@ package de.yamayaki.cesium.common.serializer;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import de.yamayaki.cesium.api.io.IScannable;
-import de.yamayaki.cesium.api.io.ISerializer;
+import de.yamayaki.cesium.api.IScannable;
+import de.yamayaki.cesium.api.ISerializer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.StreamTagVisitor;

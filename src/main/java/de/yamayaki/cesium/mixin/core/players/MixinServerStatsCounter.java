@@ -2,7 +2,7 @@ package de.yamayaki.cesium.mixin.core.players;
 
 import com.google.gson.JsonParseException;
 import com.mojang.datafixers.DataFixer;
-import de.yamayaki.cesium.api.accessor.DatabaseSetter;
+import de.yamayaki.cesium.accessor.DatabaseSetter;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.PlayerDatabaseSpecs;
 import net.minecraft.server.MinecraftServer;

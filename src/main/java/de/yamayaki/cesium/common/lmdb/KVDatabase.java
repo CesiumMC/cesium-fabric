@@ -1,9 +1,9 @@
 package de.yamayaki.cesium.common.lmdb;
 
 import de.yamayaki.cesium.common.DatabaseSpec;
-import de.yamayaki.cesium.api.io.ICompressor;
-import de.yamayaki.cesium.api.io.IScannable;
-import de.yamayaki.cesium.api.io.ISerializer;
+import de.yamayaki.cesium.api.ICompressor;
+import de.yamayaki.cesium.api.IScannable;
+import de.yamayaki.cesium.api.ISerializer;
 import de.yamayaki.cesium.common.DefaultCompressors;
 import de.yamayaki.cesium.common.DefaultSerializers;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;

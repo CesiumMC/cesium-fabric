@@ -1,6 +1,6 @@
 package de.yamayaki.cesium.common.serializer;
 
-import de.yamayaki.cesium.api.io.ISerializer;
+import de.yamayaki.cesium.api.ISerializer;
 
 import java.nio.charset.StandardCharsets;
 

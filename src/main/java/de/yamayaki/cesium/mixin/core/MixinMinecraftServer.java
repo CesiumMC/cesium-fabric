@@ -1,7 +1,7 @@
 package de.yamayaki.cesium.mixin.core;
 
 import de.yamayaki.cesium.CesiumMod;
-import de.yamayaki.cesium.api.accessor.DatabaseSource;
+import de.yamayaki.cesium.accessor.DatabaseSource;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;

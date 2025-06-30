@@ -1,4 +1,4 @@
-package de.yamayaki.cesium.api.accessor;
+package de.yamayaki.cesium.accessor;
 
 import de.yamayaki.cesium.common.DatabaseSpec;
 

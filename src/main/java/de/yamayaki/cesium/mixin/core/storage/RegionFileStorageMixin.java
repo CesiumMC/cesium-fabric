@@ -1,6 +1,6 @@
 package de.yamayaki.cesium.mixin.core.storage;
 
-import de.yamayaki.cesium.api.accessor.RawAccess;
+import de.yamayaki.cesium.accessor.RawAccess;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.storage.RegionFile;
 import net.minecraft.world.level.chunk.storage.RegionFileStorage;
