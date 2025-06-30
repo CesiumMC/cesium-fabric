@@ -6,6 +6,9 @@ import de.yamayaki.cesium.api.io.IScannable;
 import de.yamayaki.cesium.api.io.ISerializer;
 import de.yamayaki.cesium.common.DefaultCompressors;
 import de.yamayaki.cesium.common.DefaultSerializers;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
+import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
+import org.jetbrains.annotations.Nullable;
 import org.lmdbjava.Cursor;
 import org.lmdbjava.Dbi;
 import org.lmdbjava.DbiFlags;
@@ -17,6 +20,9 @@ import java.io.IOException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class KVDatabase<K, V> {
+    private final Object2ReferenceMap<K, byte[]> pending = new Object2ReferenceOpenHashMap<>();
+    private final Object2ReferenceMap<K, byte[]> snapshot = new Object2ReferenceOpenHashMap<>();
+
     private final LMDBInstance storage;
 
     private final Env<byte[]> env;
@@ -27,7 +33,7 @@ public class KVDatabase<K, V> {
 
     private final ICompressor compressor;
 
-    public KVDatabase(LMDBInstance storage, DatabaseSpec<K, V> spec, boolean compressed) {
+    public KVDatabase(final LMDBInstance storage, final DatabaseSpec<K, V> spec, final boolean isUncompressed) {
         this.storage = storage;
 
         this.env = this.storage.env;
@@ -36,11 +42,11 @@ public class KVDatabase<K, V> {
         this.keySerializer = DefaultSerializers.getSerializer(spec.getKeyType());
         this.valueSerializer = DefaultSerializers.getSerializer(spec.getValueType());
 
-        this.compressor = compressed ? DefaultCompressors.ZSTD : DefaultCompressors.NONE;
+        this.compressor = isUncompressed ? DefaultCompressors.NONE : DefaultCompressors.ZSTD;
     }
 
     public V getValue(K key) {
-        byte[] buf = this.getBytes(key);
+        byte[] buf = this.getValueRaw(key);
 
         if (buf == null) {
             return null;
@@ -53,7 +59,7 @@ public class KVDatabase<K, V> {
         }
     }
 
-    public byte[] getBytes(final K key) {
+    public byte[] getValueRaw(final K key) {
         ReentrantReadWriteLock lock = this.storage.getLock();
         byte[] buf;
 
@@ -89,7 +95,7 @@ public class KVDatabase<K, V> {
             return;
         }
 
-        byte[] bytes = this.getBytes(key);
+        byte[] bytes = this.getValueRaw(key);
 
         if (bytes == null) {
             return;
@@ -102,45 +108,74 @@ public class KVDatabase<K, V> {
         }
     }
 
-    public void setDirty() {
-        this.storage.isDirty = true;
-    }
-
-    public ISerializer<K> getKeySerializer() {
-        return this.keySerializer;
-    }
-
-    public ISerializer<V> getValueSerializer() {
-        return this.valueSerializer;
-    }
-
-    public ICompressor getCompressor() {
-        return this.compressor;
-    }
-
-    public void putValue(Txn<byte[]> txn, K key, byte[] value) {
+    public void stageChange(K key, V value) {
         try {
-            this.dbi.put(txn, this.keySerializer.serialize(key), value);
-        } catch (final IOException e) {
-            throw new RuntimeException("Could not serialize key", e);
+            byte[] data = null;
+
+            if (value != null) {
+                data = this.valueSerializer.serialize(value);
+            }
+
+            this.stageChangeRaw(key, data);
+        } catch (IOException e) {
+            throw new RuntimeException("Couldn't serialize value", e);
         }
     }
 
-    public void delete(Txn<byte[]> txn, K key) {
-        try {
-            this.dbi.delete(txn, this.keySerializer.serialize(key));
-        } catch (final IOException e) {
-            throw new RuntimeException("Could not serialize key", e);
+    public void stageChangeRaw(final K key, final byte[] value) {
+        byte[] data = null;
+
+        if (value != null) {
+            data = this.compressor.compress(value);
         }
+
+        synchronized (this.pending) {
+            this.pending.put(key, data);
+        }
+
+        this.storage.dirty = true;
     }
 
     public CursorIterator<K> getIterator() {
-        final Cursor<byte[]> cursor = this.dbi.openCursor(this.env.txnRead());
+        final Txn<byte[]> txn = this.env.txnRead();
+        final Cursor<byte[]> cursor = this.dbi.openCursor(txn);
+
         return new CursorIterator<>(cursor, this.keySerializer);
     }
 
     public Stat getStats() {
         return this.dbi.stat(this.env.txnRead());
+    }
+
+    void prepareCommit() {
+        synchronized (this.pending) {
+            this.snapshot.putAll(this.pending);
+            this.pending.clear();
+        }
+    }
+
+    void addChanges(Txn<byte[]> txn) {
+        for (Object2ReferenceMap.Entry<K, byte[]> entry : this.snapshot.object2ReferenceEntrySet()) {
+            this.dbiPutDelete(txn, entry.getKey(), entry.getValue());
+        }
+    }
+
+    void cleanupCommit() {
+        this.snapshot.clear();
+    }
+
+    private void dbiPutDelete(final Txn<byte[]> txn, final K key, final byte @Nullable [] value) {
+        try {
+            final byte[] serializedKey = this.keySerializer.serialize(key);
+
+            if (value == null) {
+                this.dbi.delete(txn, serializedKey);
+            } else {
+                this.dbi.put(txn, serializedKey, value);
+            }
+        } catch (final IOException e) {
+            throw new RuntimeException("Could not serialize key", e);
+        }
     }
 
     public void close() {

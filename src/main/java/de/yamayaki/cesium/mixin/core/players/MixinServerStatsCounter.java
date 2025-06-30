@@ -86,7 +86,7 @@ public abstract class MixinServerStatsCounter extends StatsCounter implements Da
     )
     public void redirectWrite(File file, String data) {
         this.database
-                .getTransaction(PlayerDatabaseSpecs.STATISTICS)
-                .add(this.getUuid(), data);
+                .getDatabase(PlayerDatabaseSpecs.STATISTICS)
+                .stageChange(this.getUuid(), data);
     }
 }

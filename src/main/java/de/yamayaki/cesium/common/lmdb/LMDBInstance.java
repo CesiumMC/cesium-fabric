@@ -1,6 +1,5 @@
 package de.yamayaki.cesium.common.lmdb;
 
-import de.yamayaki.cesium.CesiumConfig;
 import de.yamayaki.cesium.api.database.DatabaseSpec;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
@@ -8,7 +7,6 @@ import org.lmdbjava.ByteArrayProxy;
 import org.lmdbjava.CopyFlags;
 import org.lmdbjava.Env;
 import org.lmdbjava.EnvFlags;
-import org.lmdbjava.EnvInfo;
 import org.lmdbjava.LmdbException;
 import org.lmdbjava.Stat;
 import org.lmdbjava.Txn;
@@ -16,52 +14,45 @@ import org.slf4j.Logger;
 
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class LMDBInstance {
-    private final Reference2ObjectMap<DatabaseSpec<?, ?>, KVDatabase<?, ?>> databases = new Reference2ObjectOpenHashMap<>();
-    private final Reference2ObjectMap<DatabaseSpec<?, ?>, KVTransaction<?, ?>> transactions = new Reference2ObjectOpenHashMap<>();
+    private static final int MAX_COMMIT_ATTEMPTS = 3;
 
+    private final Reference2ObjectMap<DatabaseSpec<?, ?>, KVDatabase<?, ?>> databases = new Reference2ObjectOpenHashMap<>();
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+
+    protected final Env<byte[]> env;
+    protected final long resizeStep;
 
     protected final Logger logger;
     protected final boolean logsMapGrows;
 
-    protected final Env<byte[]> env;
+    protected volatile boolean dirty = false;
 
-    protected final int MAX_COMMIT_TRIES = 3;
-    protected final int resizeStep;
-
-    protected volatile boolean isDirty = false;
-
-    public LMDBInstance(final Path databasePath, final DatabaseSpec<?, ?>[] databases, final Logger logger, final CesiumConfig config) {
-        this.logger = logger;
-        this.logsMapGrows = config.logMapGrows();
-
+    public LMDBInstance(final Path databasePath, final DatabaseSpec<?, ?>[] databases, final Logger logger, final boolean logMapGrows, final boolean isUncompressed) {
         this.env = Env.create(ByteArrayProxy.PROXY_BA)
                 .setMaxDbs(databases.length)
                 .open(databasePath.toFile(), EnvFlags.MDB_NOLOCK, EnvFlags.MDB_NOSUBDIR);
 
-        this.resizeStep = Arrays.stream(databases).mapToInt(DatabaseSpec::getInitialSize).sum();
+        this.resizeStep = Arrays.stream(databases).mapToLong(DatabaseSpec::getInitialSize).sum();
 
-        EnvInfo info = this.env.info();
-        if (info.mapSize < this.resizeStep) {
+        if (this.env.info().mapSize < this.resizeStep) {
             this.env.setMapSize(this.resizeStep);
         }
 
-        for (DatabaseSpec<?, ?> spec : databases) {
-            KVDatabase<?, ?> database = new KVDatabase<>(this, spec, !config.isUncompressed());
-
-            this.databases.put(spec, database);
-            this.transactions.put(spec, new KVTransaction<>(database));
+        for (final DatabaseSpec<?, ?> spec : databases) {
+            this.databases.put(spec, new KVDatabase<>(this, spec, isUncompressed));
         }
+
+        this.logger = logger;
+        this.logsMapGrows = logMapGrows;
     }
 
     @SuppressWarnings("unchecked")
     public <K, V> KVDatabase<K, V> getDatabase(DatabaseSpec<K, V> spec) {
-        KVDatabase<?, ?> database = this.databases.get(spec);
+        final KVDatabase<?, ?> database = this.databases.get(spec);
 
         if (database == null) {
             throw new NullPointerException("No database is registered for spec " + spec);
@@ -70,19 +61,8 @@ public class LMDBInstance {
         return (KVDatabase<K, V>) database;
     }
 
-    @SuppressWarnings("unchecked")
-    public <K, V> KVTransaction<K, V> getTransaction(DatabaseSpec<K, V> spec) {
-        KVTransaction<?, ?> transaction = this.transactions.get(spec);
-
-        if (transaction == null) {
-            throw new NullPointerException("No transaction is registered for spec " + spec);
-        }
-
-        return (KVTransaction<K, V>) transaction;
-    }
-
     public void flushChanges() {
-        if (!this.isDirty) {
+        if (!this.dirty) {
             return;
         }
 
@@ -90,77 +70,60 @@ public class LMDBInstance {
                 .lock();
 
         try {
-            this.commitTransaction();
-            this.isDirty = false;
+            for (final KVDatabase<?, ?> txn : this.databases.values()) {
+                txn.prepareCommit();
+            }
+
+            for (int attempts = 1; attempts < MAX_COMMIT_ATTEMPTS + 1; attempts++) {
+                try (final Txn<?> txn = this.prepareTransaction()) {
+                    txn.commit();
+                    break;
+                } catch (final LmdbException l) {
+                    if (l instanceof Env.MapFullException) {
+                        this.growMap();
+                        attempts--;
+                        continue;
+                    }
+
+                    this.logger.info("Commit of transaction failed; trying again ({}/{}): {}", attempts, MAX_COMMIT_ATTEMPTS, l.getMessage());
+                }
+
+                if (attempts == MAX_COMMIT_ATTEMPTS) {
+                    throw new RuntimeException("Could not commit transactions!");
+                }
+            }
+
+            for (final KVDatabase<?, ?> txn : this.databases.values()) {
+                txn.cleanupCommit();
+            }
+
+            this.dirty = false;
         } finally {
             this.lock.writeLock()
                     .unlock();
         }
     }
 
-    private void commitTransaction() {
-        this.snapshotCreate();
-
-        for (int tries = 1; tries < MAX_COMMIT_TRIES + 1; tries++) {
-            try (final Txn<?> txn = this.prepareTransaction()) {
-                txn.commit();
-
-                break;
-            } catch (final LmdbException l) {
-                if (l instanceof Env.MapFullException) {
-                    this.growMap();
-
-                    tries--;
-                    continue;
-                }
-
-                this.logger.info("Commit of transaction failed; trying again ({}/{}): {}", tries, this.MAX_COMMIT_TRIES, l.getMessage());
-            }
-
-            if (tries == MAX_COMMIT_TRIES) {
-                throw new RuntimeException("Could not commit transactions!");
-            }
-        }
-
-        this.snapshotClear();
-    }
-
     private Txn<?> prepareTransaction() throws LmdbException {
-        final Iterator<KVTransaction<?, ?>> it = this.transactions.values()
-                .iterator();
-
         final Txn<byte[]> txn = this.env.txnWrite();
 
         try {
-            while (it.hasNext()) {
-                KVTransaction<?, ?> transaction = it.next();
-                transaction.addChanges(txn);
+            for (final KVDatabase<?, ?> dbi : this.databases.values()) {
+                dbi.addChanges(txn);
             }
-        } catch (LmdbException l) {
+        } catch (final LmdbException l) {
             txn.abort();
+            txn.close();
+
             throw l;
         }
 
         return txn;
     }
 
-    private void snapshotCreate() {
-        for (final KVTransaction<?, ?> txn : this.transactions.values()) {
-            txn.createSnapshot();
-        }
-    }
-
-    private void snapshotClear() {
-        for (final KVTransaction<?, ?> txn : this.transactions.values()) {
-            txn.clearSnapshot();
-        }
-    }
-
     private void growMap() {
-        EnvInfo info = this.env.info();
-
-        long oldSize = info.mapSize;
-        long newSize = oldSize + (long) this.resizeStep;
+        final long oldSize = this.env.info().mapSize;
+        final long newSize = oldSize + this.resizeStep;
 
         this.env.setMapSize(newSize);
 
@@ -193,7 +156,6 @@ public class LMDBInstance {
             this.lock.readLock()
                     .unlock();
         }
-
     }
 
     public ReentrantReadWriteLock getLock() {

@@ -51,7 +51,7 @@ public class CesiumPlayerStorage implements IPlayerStorage {
 
     @Override
     public void setPlayerNBT(final UUID uuid, final CompoundTag compoundTag) {
-        this.database.getTransaction(PlayerDatabaseSpecs.PLAYER_DATA).add(uuid, compoundTag);
+        this.database.getDatabase(PlayerDatabaseSpecs.PLAYER_DATA).stageChange(uuid, compoundTag);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class CesiumPlayerStorage implements IPlayerStorage {
 
     @Override
     public void setPlayerAdvancements(final UUID uuid, final String advancements) {
-        this.database.getTransaction(PlayerDatabaseSpecs.ADVANCEMENTS).add(uuid, advancements);
+        this.database.getDatabase(PlayerDatabaseSpecs.ADVANCEMENTS).stageChange(uuid, advancements);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class CesiumPlayerStorage implements IPlayerStorage {
 
     @Override
     public void setPlayerStatistics(final UUID uuid, final String statistics) {
-        this.database.getTransaction(PlayerDatabaseSpecs.STATISTICS).add(uuid, statistics);
+        this.database.getDatabase(PlayerDatabaseSpecs.STATISTICS).stageChange(uuid, statistics);
     }
 
     @Override

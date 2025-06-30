@@ -114,8 +114,8 @@ public abstract class MixinIOWorker implements DatabaseSetter, SpecificationSett
     private void cesium$write(RegionFileStorage instance, ChunkPos chunkPos, CompoundTag compoundTag) throws IOException {
         if (instance == null) {
             this.database
-                    .getTransaction(this.databaseSpec)
-                    .add(chunkPos, compoundTag);
+                    .getDatabase(this.databaseSpec)
+                    .stageChange(chunkPos, compoundTag);
         } else {
             instance.write(chunkPos, compoundTag);
         }

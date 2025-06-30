@@ -52,7 +52,7 @@ public class CesiumMod implements ModInitializer {
 
     private static @NotNull LMDBInstance openDB(@NotNull final Path dbBasePath, @NotNull final String dbName, @NotNull final DatabaseSpec<?, ?>[] dbSpecs) {
         FileHelper.ensureDirectory(dbBasePath);
-        return new LMDBInstance(dbBasePath.resolve(dbName + getFileEnding()), dbSpecs, cesiumLogger, config());
+        return new LMDBInstance(dbBasePath.resolve(dbName + getFileEnding()), dbSpecs, cesiumLogger, config().logMapGrows(), cesiumConfig.isUncompressed());
     }
 
     public static CesiumConfig config() {

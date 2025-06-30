@@ -128,7 +128,7 @@ public abstract class MixinPlayerAdvancements implements DatabaseSetter {
         }
 
         this.database
-                .getTransaction(PlayerDatabaseSpecs.ADVANCEMENTS)
-                .add(this.player.getUUID(), localWriter.get().toString());
+                .getDatabase(PlayerDatabaseSpecs.ADVANCEMENTS)
+                .stageChange(this.player.getUUID(), localWriter.get().toString());
     }
 }
