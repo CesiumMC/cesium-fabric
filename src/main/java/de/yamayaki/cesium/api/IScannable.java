@@ -1,7 +1,9 @@
 package de.yamayaki.cesium.api;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 
 public interface IScannable<T> {
-    void scan(byte[] input, T scanner) throws IOException;
+    void scan(final byte @NotNull [] input, final @NotNull T scanner) throws IOException;
 }

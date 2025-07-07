@@ -2,9 +2,10 @@ package de.yamayaki.cesium.maintenance.storage.anvil;
 
 import com.google.common.collect.ImmutableList;
 import de.yamayaki.cesium.accessor.RawAccess;
-import de.yamayaki.cesium.maintenance.storage.IChunkStorage;
+import de.yamayaki.cesium.maintenance.storage.IWorldStorage;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.storage.RegionFileStorage;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class AnvilChunkStorage implements IChunkStorage {
+public class AnvilChunkStorage implements IWorldStorage.IChunkStorage {
     private static final Pattern REGEX = Pattern.compile("^r\\.(-?[0-9]+)\\.(-?[0-9]+)\\.mca$");
 
     private final Logger logger;
@@ -35,7 +36,7 @@ public class AnvilChunkStorage implements IChunkStorage {
     }
 
     @Override
-    public List<ChunkPos> getAllChunks() {
+    public List<ChunkPos> getAllKeys() {
         final File regionsFolder = new File(this.basePath.toFile(), "region");
         final File[] files = regionsFolder.listFiles((filex, string) -> string.endsWith(".mca"));
 
@@ -63,6 +64,60 @@ public class AnvilChunkStorage implements IChunkStorage {
     }
 
     @Override
+    public synchronized void setChunk(final @NotNull ChunkPos chunkPos, final byte @NotNull [] bytes) {
+        try {
+            ((RawAccess) (Object) this.chunkData).cesium$putBytes(chunkPos, bytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public synchronized byte[] getChunk(final @NotNull ChunkPos chunkPos) {
+        try {
+            return ((RawAccess) (Object) this.chunkData).cesium$getBytes(chunkPos);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public synchronized void setPOI(final ChunkPos chunkPos, final byte @NotNull [] bytes) {
+        try {
+            ((RawAccess) (Object) this.poiData).cesium$putBytes(chunkPos, bytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public synchronized byte[] getPOI(final ChunkPos chunkPos) {
+        try {
+            return ((RawAccess) (Object) this.poiData).cesium$getBytes(chunkPos);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public synchronized void setEntity(final ChunkPos chunkPos, final byte @NotNull [] bytes) {
+        try {
+            ((RawAccess) (Object) this.entityData).cesium$putBytes(chunkPos, bytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public synchronized byte[] getEntity(final ChunkPos chunkPos) {
+        try {
+            return ((RawAccess) (Object) this.entityData).cesium$getBytes(chunkPos);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public void flush() {
         try {
             this.chunkData.flush();
@@ -87,56 +142,7 @@ public class AnvilChunkStorage implements IChunkStorage {
     }
 
     @Override
-    public synchronized void setChunkData(final ChunkPos chunkPos, final byte[] bytes) {
-        try {
-            ((RawAccess) (Object) this.chunkData).cesium$putBytes(chunkPos, bytes);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public synchronized byte[] getChunkData(final ChunkPos chunkPos) {
-        try {
-            return ((RawAccess) (Object) this.chunkData).cesium$getBytes(chunkPos);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public synchronized void setPOIData(final ChunkPos chunkPos, final byte[] bytes) {
-        try {
-            ((RawAccess) (Object) this.poiData).cesium$putBytes(chunkPos, bytes);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public synchronized byte[] getPOIData(final ChunkPos chunkPos) {
-        try {
-            return ((RawAccess) (Object) this.poiData).cesium$getBytes(chunkPos);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public synchronized void setEntityData(final ChunkPos chunkPos, final byte[] bytes) {
-        try {
-            ((RawAccess) (Object) this.entityData).cesium$putBytes(chunkPos, bytes);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public synchronized byte[] getEntityData(final ChunkPos chunkPos) {
-        try {
-            return ((RawAccess) (Object) this.entityData).cesium$getBytes(chunkPos);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public String toString() {
+        return "AnvilChunk";
     }
 }

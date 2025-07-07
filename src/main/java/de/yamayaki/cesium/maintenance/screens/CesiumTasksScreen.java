@@ -1,5 +1,6 @@
 package de.yamayaki.cesium.maintenance.screens;
 
+import de.yamayaki.cesium.MinecraftHelper;
 import de.yamayaki.cesium.maintenance.AbstractTask;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -8,11 +9,8 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.WorldStem;
-import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Unique;
 
@@ -74,33 +72,9 @@ public class CesiumTasksScreen extends Screen {
         return Button.builder(
                 Component.literal(text),
                 action -> this.minecraft.setScreen(
-                        new CesiumWorkScreen(task, this.levelAccess, this.createRegistry(), this.callback)
+                        new CesiumWorkScreen(task, MinecraftHelper.createWorldInfo(this.minecraft, this.levelAccess), this.callback)
                 )
         ).width(200).build();
-    }
-
-    /*
-     * See vanilla code net.minecraft.client.gui.screens.worldselection.OptimizeWorldScreen.create(...);
-     */
-    @Unique
-    private RegistryAccess.Frozen createRegistry() {
-        assert this.minecraft != null;
-
-        try {
-            final var worldOpenFlows = this.minecraft.createWorldOpenFlows();
-            final var packRepository = ServerPacksSource.createPackRepository(this.levelAccess);
-
-            try (final WorldStem worldStem = worldOpenFlows.loadWorldStem(levelAccess /*? >= 1.20.4 {*/.getDataTag()/*?}*/, false/*? >= 1.20.4 {*/, packRepository/*?}*/)) {
-                final var worldData = worldStem.worldData();
-                final var frozen = worldStem.registries().compositeAccess();
-
-                this.levelAccess.saveDataTag(frozen, worldData);
-
-                return frozen;
-            }
-        } catch (final Throwable t) {
-            throw new RuntimeException("Failed to load datapacks, can't convert world", t);
-        }
     }
 
     @Override

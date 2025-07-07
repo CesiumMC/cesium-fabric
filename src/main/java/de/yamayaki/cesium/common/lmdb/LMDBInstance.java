@@ -130,7 +130,7 @@ public class LMDBInstance {
         }
     }
 
-    public void createCopy(final Path path) {
+    public void copyTo(final Path path) {
         this.lock.writeLock()
                 .lock();
 

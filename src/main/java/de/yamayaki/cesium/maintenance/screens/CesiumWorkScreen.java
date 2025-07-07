@@ -1,29 +1,28 @@
 package de.yamayaki.cesium.maintenance.screens;
 
 import de.yamayaki.cesium.maintenance.AbstractTask;
+import de.yamayaki.cesium.maintenance.WorldInfo;
 import de.yamayaki.cesium.maintenance.tasks.DatabaseCompact;
 import de.yamayaki.cesium.maintenance.tasks.DatabaseConvert;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.CommonColors;
-import net.minecraft.world.level.storage.LevelStorageSource;
 
 public class CesiumWorkScreen extends Screen {
     private final BooleanConsumer callback;
     private final AbstractTask cesiumTask;
 
-    public CesiumWorkScreen(AbstractTask.Task task, LevelStorageSource.LevelStorageAccess levelAccess, RegistryAccess registryAccess, BooleanConsumer callback) {
+    public CesiumWorkScreen(AbstractTask.Task task, WorldInfo worldInfo, BooleanConsumer callback) {
         super(Component.literal("Working on Cesium task"));
 
         this.callback = callback;
         this.cesiumTask = switch (task) {
-            case TO_ANVIL, TO_CESIUM -> new DatabaseConvert(task, levelAccess, registryAccess);
-            case COMPACT -> new DatabaseCompact(levelAccess, registryAccess);
+            case TO_ANVIL, TO_CESIUM -> new DatabaseConvert(task, worldInfo);
+            case COMPACT -> new DatabaseCompact(worldInfo);
         };
     }
 

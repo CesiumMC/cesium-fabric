@@ -4,8 +4,10 @@ import de.yamayaki.cesium.CesiumMod;
 import de.yamayaki.cesium.common.lmdb.SerializingCursor;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.WorldDatabaseSpecs;
-import de.yamayaki.cesium.maintenance.storage.IChunkStorage;
+import de.yamayaki.cesium.maintenance.storage.IWorldStorage;
 import net.minecraft.world.level.ChunkPos;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.lmdbjava.LmdbException;
 import org.slf4j.Logger;
 
@@ -13,7 +15,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CesiumChunkStorage implements IChunkStorage {
+public class CesiumChunkStorage implements IWorldStorage.IChunkStorage {
     private final Logger logger;
     private final LMDBInstance database;
 
@@ -23,7 +25,7 @@ public class CesiumChunkStorage implements IChunkStorage {
     }
 
     @Override
-    public List<ChunkPos> getAllChunks() {
+    public List<ChunkPos> getAllKeys() {
         final List<ChunkPos> list = new ArrayList<>();
 
         try (final SerializingCursor<ChunkPos> crs = this.database.getDatabase(WorldDatabaseSpecs.CHUNK_DATA).getIterator()) {
@@ -53,32 +55,37 @@ public class CesiumChunkStorage implements IChunkStorage {
     }
 
     @Override
-    public void setChunkData(final ChunkPos chunkPos, final byte[] bytes) {
+    public void setChunk(final @NotNull ChunkPos chunkPos, final byte @Nullable [] bytes) {
         this.database.getDatabase(WorldDatabaseSpecs.CHUNK_DATA).stageChangeRaw(chunkPos, bytes);
     }
 
     @Override
-    public byte[] getChunkData(final ChunkPos chunkPos) {
+    public byte[] getChunk(final @NotNull ChunkPos chunkPos) {
         return this.database.getDatabase(WorldDatabaseSpecs.CHUNK_DATA).getValueRaw(chunkPos);
     }
 
     @Override
-    public void setPOIData(final ChunkPos chunkPos, final byte[] bytes) {
+    public void setPOI(final ChunkPos chunkPos, final byte @Nullable [] bytes) {
         this.database.getDatabase(WorldDatabaseSpecs.POI).stageChangeRaw(chunkPos, bytes);
     }
 
     @Override
-    public byte[] getPOIData(final ChunkPos chunkPos) {
+    public byte[] getPOI(final ChunkPos chunkPos) {
         return this.database.getDatabase(WorldDatabaseSpecs.POI).getValueRaw(chunkPos);
     }
 
     @Override
-    public void setEntityData(final ChunkPos chunkPos, final byte[] bytes) {
+    public void setEntity(final ChunkPos chunkPos, final byte @Nullable [] bytes) {
         this.database.getDatabase(WorldDatabaseSpecs.ENTITY).stageChangeRaw(chunkPos, bytes);
     }
 
     @Override
-    public byte[] getEntityData(final ChunkPos chunkPos) {
+    public byte[] getEntity(final ChunkPos chunkPos) {
         return this.database.getDatabase(WorldDatabaseSpecs.ENTITY).getValueRaw(chunkPos);
+    }
+
+    @Override
+    public String toString() {
+        return "LmdbChunk";
     }
 }

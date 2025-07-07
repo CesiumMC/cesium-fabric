@@ -1,7 +1,9 @@
 package de.yamayaki.cesium.api;
 
-public interface ICompressor {
-    byte[] compress(final byte[] input);
+import org.jetbrains.annotations.NotNull;
 
-    byte[] decompress(final byte[] input);
+public interface ICompressor {
+    byte @NotNull [] compress(final byte @NotNull [] input);
+
+    byte @NotNull [] decompress(final byte @NotNull [] input);
 }

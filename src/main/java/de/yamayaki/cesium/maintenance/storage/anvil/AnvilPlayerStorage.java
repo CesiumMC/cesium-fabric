@@ -1,9 +1,10 @@
 package de.yamayaki.cesium.maintenance.storage.anvil;
 
 import de.yamayaki.cesium.FileHelper;
-import de.yamayaki.cesium.maintenance.storage.IPlayerStorage;
+import de.yamayaki.cesium.maintenance.storage.IWorldStorage;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class AnvilPlayerStorage implements IPlayerStorage {
+public class AnvilPlayerStorage implements IWorldStorage.IPlayerStorage {
     private final Logger logger;
 
     private final Path playerData;
@@ -30,7 +31,7 @@ public class AnvilPlayerStorage implements IPlayerStorage {
     }
 
     @Override
-    public List<UUID> getAllPlayers() {
+    public List<UUID> getAllKeys() {
         return FileHelper.resolveAllEnding(this.playerData, ".dat").stream().map(file -> {
             try {
                 final String fileName = file.getName();
@@ -50,17 +51,23 @@ public class AnvilPlayerStorage implements IPlayerStorage {
     }
 
     @Override
-    public void close() {
+    public void flush() {
+        // Not supported
     }
 
     @Override
-    public void setPlayerNBT(final UUID uuid, final CompoundTag compoundTag) {
+    public void close() {
+        // Not supported
+    }
+
+    @Override
+    public void setPlayer(final @NotNull UUID uuid, final CompoundTag compoundTag) {
         if (compoundTag == null) {
             return;
         }
 
         try {
-            final Path savePath = this.playerData.resolve(uuid.toString() + ".dat");
+            final Path savePath = this.playerData.resolve(uuid + ".dat");
             if (!Files.isDirectory(savePath.getParent()) || !Files.isRegularFile(savePath)) {
                 Files.createDirectories(savePath.getParent());
                 Files.createFile(savePath);
@@ -73,11 +80,11 @@ public class AnvilPlayerStorage implements IPlayerStorage {
     }
 
     @Override
-    public CompoundTag getPlayerNBT(final UUID uuid) {
+    public CompoundTag getPlayer(final @NotNull UUID uuid) {
         CompoundTag compoundTag = null;
 
         try {
-            final Path savePath = this.playerData.resolve(uuid.toString() + ".dat");
+            final Path savePath = this.playerData.resolve(uuid + ".dat");
             if (Files.isRegularFile(savePath)) {
                 compoundTag = NbtIo.readCompressed(savePath/*? <= 1.20.1 {*/ /*.toFile() *//*?}*/ /*? >= 1.20.4 {*/, net.minecraft.nbt.NbtAccounter.unlimitedHeap() /*?}*/);
             }
@@ -89,9 +96,9 @@ public class AnvilPlayerStorage implements IPlayerStorage {
     }
 
     @Override
-    public void setPlayerAdvancements(final UUID uuid, final String advancements) {
+    public void setAdvancements(final @NotNull UUID uuid, final String advancements) {
         try {
-            final Path savePath = this.advancementsStorage.resolve(uuid.toString() + ".json");
+            final Path savePath = this.advancementsStorage.resolve(uuid + ".json");
             Files.writeString(savePath, advancements, StandardCharsets.UTF_8);
         } catch (IOException exception) {
             this.logger.warn("[ANVIL] Failed to set advancements for {}", uuid);
@@ -99,10 +106,10 @@ public class AnvilPlayerStorage implements IPlayerStorage {
     }
 
     @Override
-    public String getPlayerAdvancements(final UUID uuid) {
+    public String getAdvancements(final @NotNull UUID uuid) {
         String advancements = null;
         try {
-            final Path savePath = this.advancementsStorage.resolve(uuid.toString() + ".json");
+            final Path savePath = this.advancementsStorage.resolve(uuid + ".json");
             advancements = Files.readString(savePath, StandardCharsets.UTF_8);
         } catch (IOException exception) {
             this.logger.warn("[ANVIL] Failed to load advancements for {}", uuid);
@@ -112,9 +119,9 @@ public class AnvilPlayerStorage implements IPlayerStorage {
     }
 
     @Override
-    public void setPlayerStatistics(final UUID uuid, final String statistics) {
+    public void setStatistics(final @NotNull UUID uuid, final String statistics) {
         try {
-            final Path savePath = this.statsStorage.resolve(uuid.toString() + ".json");
+            final Path savePath = this.statsStorage.resolve(uuid + ".json");
             Files.writeString(savePath, statistics, StandardCharsets.UTF_8);
         } catch (IOException exception) {
             this.logger.warn("[ANVIL] Failed to save statistics for {}", uuid);
@@ -122,15 +129,20 @@ public class AnvilPlayerStorage implements IPlayerStorage {
     }
 
     @Override
-    public String getPlayerStatistics(final UUID uuid) {
+    public String getStatistics(final @NotNull UUID uuid) {
         String statistics = null;
         try {
-            final Path savePath = this.statsStorage.resolve(uuid.toString() + ".json");
+            final Path savePath = this.statsStorage.resolve(uuid + ".json");
             statistics = Files.readString(savePath, StandardCharsets.UTF_8);
         } catch (IOException exception) {
             this.logger.warn("[ANVIL] Failed to load statistics for {}", uuid);
         }
 
         return statistics;
+    }
+
+    @Override
+    public String toString() {
+        return "AnvilPlayer";
     }
 }

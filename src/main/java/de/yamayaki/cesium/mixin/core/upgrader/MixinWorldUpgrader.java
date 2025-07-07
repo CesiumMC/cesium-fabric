@@ -178,7 +178,7 @@ public abstract class MixinWorldUpgrader {
     @org.spongepowered.asm.mixin.Overwrite
     private List<ChunkPos> getAllChunkPos(ResourceKey<Level> resourceKey) {
         final de.yamayaki.cesium.maintenance.storage.cesium.CesiumChunkStorage chunkStorage = new de.yamayaki.cesium.maintenance.storage.cesium.CesiumChunkStorage(LOGGER, this.levelStorage.getDimensionPath(resourceKey));
-        final List<ChunkPos> chunkList = chunkStorage.getAllChunks();
+        final List<ChunkPos> chunkList = chunkStorage.getAllKeys();
 
         chunkStorage.close();
         return chunkList;

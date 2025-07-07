@@ -1,58 +1,41 @@
 package de.yamayaki.cesium.maintenance.tasks;
 
 import de.yamayaki.cesium.CesiumMod;
+import de.yamayaki.cesium.FileHelper;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.maintenance.AbstractTask;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.storage.LevelStorageSource;
+import de.yamayaki.cesium.maintenance.WorldInfo;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 
 public class DatabaseCompact extends AbstractTask {
-    public DatabaseCompact(final LevelStorageSource.LevelStorageAccess levelStorageAccess, final RegistryAccess registryAccess) {
-        super("Compact", levelStorageAccess, registryAccess);
+    public DatabaseCompact(final WorldInfo worldInfo) {
+        super("Compact", worldInfo);
+        this.start();
     }
 
     @Override
-    protected void runTasks() {
-        this.totalElements.set(this.levels.size());
-
-        for (final ResourceKey<Level> levelResourceKey : this.levels) {
-            this.currentElement.incrementAndGet();
-            this.currentLevel.set(levelResourceKey);
-
-            this.compactLevelDatabase(levelResourceKey);
-        }
-
-        this.running.set(false);
+    protected void runOnPlayerData(final Path storagePath) {
+        // We do not compact player data
     }
 
-    private void compactLevelDatabase(final ResourceKey<Level> level) {
-        final Path dimensionPath = this.levelAccess.getDimensionPath(level);
+    @Override
+    protected void runOnDimension(final Path storagePath) {
+        final Path source = storagePath.resolve(CesiumMod.dbFileName("chunks"));
+        final Path target = storagePath.resolve("chunks.copy");
 
-        final Path originalPath = dimensionPath.resolve("chunks" + CesiumMod.getFileEnding());
-        final Path copyPath = dimensionPath.resolve("chunks.copy");
-
-        final LMDBInstance dbInstance = CesiumMod.openWorldDB(dimensionPath);
-
-        this.status.set("Compacting level data for " + level.location().getPath());
+        final LMDBInstance lmdb = CesiumMod.openWorldDB(storagePath);
 
         try {
-            dbInstance.createCopy(copyPath);
-            dbInstance.close();
+            lmdb.copyTo(target);
+            lmdb.close();
 
-            if (Files.isRegularFile(copyPath) && Files.isRegularFile(originalPath)) {
-                Files.move(copyPath, originalPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-            }
+            FileHelper.atomicReplace(target, source);
         } catch (final Throwable t) {
             throw new RuntimeException("Failed to compact level.", t);
         } finally {
-            if (!dbInstance.closed()) {
-                dbInstance.close();
+            if (!lmdb.closed()) {
+                lmdb.close();
             }
         }
     }

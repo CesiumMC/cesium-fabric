@@ -48,7 +48,7 @@ public class CesiumMod implements ModInitializer {
 
     private static @NotNull LMDBInstance openDB(@NotNull final Path dbBasePath, @NotNull final String dbName, @NotNull final DatabaseSpec<?, ?>[] dbSpecs) {
         FileHelper.ensureDirectory(dbBasePath);
-        return new LMDBInstance(dbBasePath.resolve(dbName + getFileEnding()), dbSpecs, config().logMapGrows(), cesiumConfig.isUncompressed());
+        return new LMDBInstance(dbBasePath.resolve(dbFileName(dbName)), dbSpecs, config().logMapGrows(), cesiumConfig.isUncompressed());
     }
 
     public static CesiumConfig config() {
@@ -59,7 +59,7 @@ public class CesiumMod implements ModInitializer {
         return cesiumConfig;
     }
 
-    public static String getFileEnding() {
-        return config().isUncompressed() ? ".uncompressed.db" : ".db";
+    public static String dbFileName(final String baseName) {
+        return baseName + (config().isUncompressed() ? ".uncompressed.db" : ".db");
     }
 }

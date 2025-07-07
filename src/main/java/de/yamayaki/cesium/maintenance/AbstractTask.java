@@ -1,71 +1,74 @@
 package de.yamayaki.cesium.maintenance;
 
-import com.mojang.logging.LogUtils;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.storage.LevelStorageSource;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class AbstractTask {
-    protected final Logger logger = LogUtils.getLogger();
+    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractTask.class);
 
-    protected final LevelStorageSource.LevelStorageAccess levelAccess;
-    protected final List<ResourceKey<Level>> levels;
+    private final WorldInfo world;
+    private final Thread worker;
 
-    protected final Thread workerThread;
+    private int dimensionIndex = -1;
+
     protected final AtomicBoolean running = new AtomicBoolean(true);
-
     protected final AtomicReference<String> status = new AtomicReference<>();
-
     protected final AtomicInteger totalElements = new AtomicInteger(0);
     protected final AtomicInteger currentElement = new AtomicInteger(0);
-    protected final AtomicReference<ResourceKey<Level>> currentLevel = new AtomicReference<>(null);
 
-    public AbstractTask(final String task, final LevelStorageSource.LevelStorageAccess levelAccess, final RegistryAccess registryAccess) {
-        this.levelAccess = levelAccess;
-
-        this.levels = registryAccess
-                //? if >= 1.21.2 {
-                .lookupOrThrow(Registries.LEVEL_STEM)
-                //?} else {
-                /*.registryOrThrow(Registries.LEVEL_STEM)
-                *///?}
-                .registryKeySet()
-                .stream().map(Registries::levelStemToLevel)
-                .toList();
-
-        this.status.set("Loading required data into memory ...");
-
-        this.workerThread = this.createWorkerThread(task);
-        this.workerThread.start();
+    public AbstractTask(final String task, final WorldInfo levels) {
+        this.status.set("Loading ...");
+        this.world = levels;
+        this.worker = this.createWorkerThread(task);
     }
 
-    public @NotNull Thread createWorkerThread(final String task) {
-        final Thread workerThread = new Thread(this::runTasks, "Cesium-" + task + "-Database");
+    private @NotNull Thread createWorkerThread(final String task) {
+        final Thread workerThread = new Thread(this::runTasks, "Cesium-Maintenance");
         workerThread.setDaemon(true);
         workerThread.setUncaughtExceptionHandler((thread, throwable) -> {
-            this.logger.error("Uncaught exception while {} world!", task, throwable);
+            LOGGER.error("Uncaught exception while {} world!", task, throwable);
             this.running.set(false);
         });
 
         return workerThread;
     }
 
-    protected abstract void runTasks();
+    private void runTasks() {
+        this.status.set("Working on player data ...");
+
+        this.runOnPlayerData(this.world.root());
+
+        this.status.set("Working on dimension data ...");
+
+        for (final WorldInfo.DimensionInfo dimensionInfo : this.world.levels()) {
+            this.dimensionIndex++;
+            this.runOnDimension(dimensionInfo.path());
+        }
+
+        this.running.set(false);
+    }
+
+    protected abstract void runOnPlayerData(final Path storagePath);
+
+    protected abstract void runOnDimension(final Path storagePath);
+
+    protected void start() {
+        this.worker.start();
+    }
 
     public void cancelTask() {
         this.running.set(false);
 
+        this.status.set("Cancelling task ...");
+
         try {
-            this.workerThread.join();
+            this.worker.join();
         } catch (InterruptedException ignored) {
         }
     }
@@ -75,8 +78,9 @@ public abstract class AbstractTask {
     }
 
     public String levelName() {
-        final ResourceKey<Level> curLevel = this.currentLevel.get();
-        return curLevel == null ? "<unnamed>" : curLevel.toString();
+        return (this.dimensionIndex != -1)
+                ? this.world.levels()[this.dimensionIndex].name()
+                : "<unnamed>";
     }
 
     public String status() {
@@ -96,7 +100,7 @@ public abstract class AbstractTask {
     }
 
     public Logger logger() {
-        return this.logger;
+        return LOGGER;
     }
 
     public enum Task {
