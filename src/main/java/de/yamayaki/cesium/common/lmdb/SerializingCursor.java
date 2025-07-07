@@ -6,13 +6,13 @@ import org.lmdbjava.Cursor;
 import java.io.IOException;
 import java.util.Iterator;
 
-public class CursorIterator<K> implements Iterator<K>, AutoCloseable {
+public class SerializingCursor<K> implements Iterator<K>, AutoCloseable {
     private final Cursor<byte[]> cursor;
     private final ISerializer<K> serializer;
 
     private boolean hasNext;
 
-    public CursorIterator(final Cursor<byte[]> cursor, final ISerializer<K> serializer) {
+    public SerializingCursor(final Cursor<byte[]> cursor, final ISerializer<K> serializer) {
         this.cursor = cursor;
         this.serializer = serializer;
 

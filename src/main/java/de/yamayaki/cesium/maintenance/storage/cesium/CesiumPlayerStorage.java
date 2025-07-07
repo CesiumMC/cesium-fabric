@@ -1,7 +1,7 @@
 package de.yamayaki.cesium.maintenance.storage.cesium;
 
 import de.yamayaki.cesium.CesiumMod;
-import de.yamayaki.cesium.common.lmdb.CursorIterator;
+import de.yamayaki.cesium.common.lmdb.SerializingCursor;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.PlayerDatabaseSpecs;
 import de.yamayaki.cesium.maintenance.storage.IPlayerStorage;
@@ -27,7 +27,7 @@ public class CesiumPlayerStorage implements IPlayerStorage {
     public List<UUID> getAllPlayers() {
         final List<UUID> list = new ArrayList<>();
 
-        try (final CursorIterator<UUID> crs = this.database.getDatabase(PlayerDatabaseSpecs.STATISTICS).getIterator()) {
+        try (final SerializingCursor<UUID> crs = this.database.getDatabase(PlayerDatabaseSpecs.STATISTICS).getIterator()) {
             while (crs.hasNext()) {
                 list.add(crs.next());
             }

@@ -136,11 +136,11 @@ public class KVDatabase<K, V> {
         this.storage.dirty = true;
     }
 
-    public CursorIterator<K> getIterator() {
+    public SerializingCursor<K> getIterator() {
         final Txn<byte[]> txn = this.env.txnRead();
         final Cursor<byte[]> cursor = this.dbi.openCursor(txn);
 
-        return new CursorIterator<>(cursor, this.keySerializer);
+        return new SerializingCursor<>(cursor, this.keySerializer);
     }
 
     public Stat getStats() {

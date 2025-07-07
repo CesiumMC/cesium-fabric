@@ -1,7 +1,7 @@
 package de.yamayaki.cesium.maintenance.storage.cesium;
 
 import de.yamayaki.cesium.CesiumMod;
-import de.yamayaki.cesium.common.lmdb.CursorIterator;
+import de.yamayaki.cesium.common.lmdb.SerializingCursor;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.WorldDatabaseSpecs;
 import de.yamayaki.cesium.maintenance.storage.IChunkStorage;
@@ -26,7 +26,7 @@ public class CesiumChunkStorage implements IChunkStorage {
     public List<ChunkPos> getAllChunks() {
         final List<ChunkPos> list = new ArrayList<>();
 
-        try (final CursorIterator<ChunkPos> crs = this.database.getDatabase(WorldDatabaseSpecs.CHUNK_DATA).getIterator()) {
+        try (final SerializingCursor<ChunkPos> crs = this.database.getDatabase(WorldDatabaseSpecs.CHUNK_DATA).getIterator()) {
             while (crs.hasNext()) {
                 list.add(crs.next());
             }

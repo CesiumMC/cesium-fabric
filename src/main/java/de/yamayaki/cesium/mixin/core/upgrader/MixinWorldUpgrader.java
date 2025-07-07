@@ -93,7 +93,7 @@ public abstract class MixinWorldUpgrader {
     public List<net.minecraft.util.worldupdate.WorldUpgrader.FileToUpgrade> cesiumGetChunks(net.minecraft.world.level.chunk.storage.RegionStorageInfo regionStorageInfo, java.nio.file.Path path) {
         final Map<String, List<ChunkPos>> regionList = new java.util.HashMap<>();
 
-        try (final de.yamayaki.cesium.common.lmdb.CursorIterator<ChunkPos> crs = tmpDatabase.getDatabase(tmpSpec).getIterator()) {
+        try (final de.yamayaki.cesium.common.lmdb.SerializingCursor<ChunkPos> crs = tmpDatabase.getDatabase(tmpSpec).getIterator()) {
             while (crs.hasNext()) {
                 final ChunkPos chunkPos = crs.next();
                 final String regionKey = chunkPos.getRegionX() + "." + chunkPos.getRegionZ();
