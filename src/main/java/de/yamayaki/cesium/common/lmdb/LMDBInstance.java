@@ -11,6 +11,7 @@ import org.lmdbjava.LmdbException;
 import org.lmdbjava.Stat;
 import org.lmdbjava.Txn;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class LMDBInstance {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LMDBInstance.class);
     private static final int MAX_COMMIT_ATTEMPTS = 3;
 
     private final Reference2ObjectMap<DatabaseSpec<?, ?>, KVDatabase<?, ?>> databases = new Reference2ObjectOpenHashMap<>();
@@ -26,12 +28,11 @@ public class LMDBInstance {
     protected final Env<byte[]> env;
     protected final long resizeStep;
 
-    protected final Logger logger;
     protected final boolean logsMapGrows;
 
     protected volatile boolean dirty = false;
 
-    public LMDBInstance(final Path databasePath, final DatabaseSpec<?, ?>[] databases, final Logger logger, final boolean logMapGrows, final boolean isUncompressed) {
+    public LMDBInstance(final Path databasePath, final DatabaseSpec<?, ?>[] databases, final boolean logMapGrows, final boolean isUncompressed) {
         this.env = Env.create(ByteArrayProxy.PROXY_BA)
                 .setMaxDbs(databases.length)
                 .open(databasePath.toFile(), EnvFlags.MDB_NOLOCK, EnvFlags.MDB_NOSUBDIR);
@@ -46,7 +47,6 @@ public class LMDBInstance {
             this.databases.put(spec, new KVDatabase<>(this, spec, isUncompressed));
         }
 
-        this.logger = logger;
         this.logsMapGrows = logMapGrows;
     }
 
@@ -62,9 +62,7 @@ public class LMDBInstance {
     }
 
     public void flushChanges() {
-        if (!this.dirty) {
-            return;
-        }
+        if (!this.dirty) return;
 
         this.lock.writeLock()
                 .lock();
@@ -85,7 +83,7 @@ public class LMDBInstance {
                         continue;
                     }
 
-                    this.logger.info("Commit of transaction failed; trying again ({}/{}): {}", attempts, MAX_COMMIT_ATTEMPTS, l.getMessage());
+                    LOGGER.info("Commit of transaction failed; trying again ({}/{}): {}", attempts, MAX_COMMIT_ATTEMPTS, l.getMessage());
                 }
 
                 if (attempts == MAX_COMMIT_ATTEMPTS) {
@@ -128,7 +126,7 @@ public class LMDBInstance {
         this.env.setMapSize(newSize);
 
         if (this.logsMapGrows) {
-            this.logger.info("Grew map size from {} to {} MB", (oldSize / 1024 / 1024), (newSize / 1024 / 1024));
+            LOGGER.info("Grew map size from {} to {} MB", (oldSize / 1024 / 1024), (newSize / 1024 / 1024));
         }
     }
 

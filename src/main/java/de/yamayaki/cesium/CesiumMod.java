@@ -1,6 +1,5 @@
 package de.yamayaki.cesium;
 
-import com.mojang.logging.LogUtils;
 import de.yamayaki.cesium.common.DatabaseSpec;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.PlayerDatabaseSpecs;
@@ -8,7 +7,6 @@ import de.yamayaki.cesium.common.spec.WorldDatabaseSpecs;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
 import java.nio.file.Path;
@@ -25,7 +23,6 @@ public class CesiumMod implements ModInitializer {
             PlayerDatabaseSpecs.STATISTICS
     };
 
-    private static Logger cesiumLogger;
     private static CesiumConfig cesiumConfig;
 
     @Override
@@ -34,7 +31,6 @@ public class CesiumMod implements ModInitializer {
                 .getConfigDir()
                 .resolve("cesium.json");
 
-        cesiumLogger = LogUtils.getLogger();
         cesiumConfig = new CesiumConfig.Loader(configPath).get();
 
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
@@ -52,7 +48,7 @@ public class CesiumMod implements ModInitializer {
 
     private static @NotNull LMDBInstance openDB(@NotNull final Path dbBasePath, @NotNull final String dbName, @NotNull final DatabaseSpec<?, ?>[] dbSpecs) {
         FileHelper.ensureDirectory(dbBasePath);
-        return new LMDBInstance(dbBasePath.resolve(dbName + getFileEnding()), dbSpecs, cesiumLogger, config().logMapGrows(), cesiumConfig.isUncompressed());
+        return new LMDBInstance(dbBasePath.resolve(dbName + getFileEnding()), dbSpecs, config().logMapGrows(), cesiumConfig.isUncompressed());
     }
 
     public static CesiumConfig config() {
