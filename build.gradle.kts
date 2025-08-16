@@ -1,7 +1,8 @@
 import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
-    id("fabric-loom") version "1.10.5"
+    id("fabric-loom") version "1.11.7"
+    id("dev.kikugie.stonecutter") version "0.7.8"
 }
 
 base.archivesName.set("${project.property("archives_base_name")}+${stonecutter.current.project}")
@@ -10,6 +11,7 @@ version = project.property("mod_version").toString()
 group = project.property("maven_group").toString()
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 

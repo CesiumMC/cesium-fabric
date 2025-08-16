@@ -3,17 +3,16 @@
   "id": "cesium",
   "version": "${v_mod}",
   "name": "Cesium",
-  "description": "An alternative storage format for Minecraft worlds which improves performance and reliability.",
+  "description": "An alternative storage format for Minecraft.",
   "authors": [
     "JellySquid",
     "Yamayaki"
   ],
   "contact": {
-    "homepage": "https://github.com/yamayaki1",
-    "sources": "https://github.com/yamayaki1/cesium-fabric"
+    "homepage": "https://github.com/CesiumMC",
+    "sources": "https://github.com/CesiumMC/cesium-fabric"
   },
   "license": "LGPL-3.0",
-  "icon": "assets/cesium/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
