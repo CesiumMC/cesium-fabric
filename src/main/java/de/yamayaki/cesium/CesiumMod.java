@@ -9,6 +9,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 public class CesiumMod implements ModInitializer {
@@ -47,8 +48,12 @@ public class CesiumMod implements ModInitializer {
     }
 
     private static @NotNull LMDBInstance openDB(@NotNull final Path dbBasePath, @NotNull final String dbName, @NotNull final DatabaseSpec<?, ?>[] dbSpecs) {
-        FileHelper.ensureDirectory(dbBasePath);
-        return new LMDBInstance(dbBasePath.resolve(dbFileName(dbName)), dbSpecs, config().logMapGrows(), cesiumConfig.isUncompressed());
+        try {
+            FileHelper.ensureDirectory(dbBasePath);
+            return new LMDBInstance(dbBasePath.resolve(dbFileName(dbName)), dbSpecs, config().logMapGrows(), cesiumConfig.isUncompressed());
+        } catch (final IOException i) {
+            throw new RuntimeException("Could not open database", i);
+        }
     }
 
     public static CesiumConfig config() {

@@ -1,13 +1,13 @@
 package de.yamayaki.cesium.maintenance.tasks;
 
-import de.yamayaki.cesium.MinecraftHelper;
+import de.yamayaki.cesium.MCHelper;
 import de.yamayaki.cesium.maintenance.AbstractTask;
 import de.yamayaki.cesium.maintenance.WorldInfo;
 import de.yamayaki.cesium.maintenance.storage.IWorldStorage;
-import de.yamayaki.cesium.maintenance.storage.anvil.AnvilChunkStorage;
-import de.yamayaki.cesium.maintenance.storage.anvil.AnvilPlayerStorage;
-import de.yamayaki.cesium.maintenance.storage.cesium.CesiumChunkStorage;
-import de.yamayaki.cesium.maintenance.storage.cesium.CesiumPlayerStorage;
+import de.yamayaki.cesium.maintenance.storage.IWorldStorage.IDimensionStorage;
+import de.yamayaki.cesium.maintenance.storage.IWorldStorage.IPlayerStorage;
+import de.yamayaki.cesium.maintenance.storage.impl.AnvilWorldStorage;
+import de.yamayaki.cesium.maintenance.storage.impl.CesiumWorldStorage;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
@@ -28,8 +28,8 @@ public class DatabaseConvert extends AbstractTask {
     @Override
     protected void runOnPlayerData(final Path storagePath) {
         try (
-                final IWorldStorage.IPlayerStorage _old = this.pStorage(storagePath, true);
-                final IWorldStorage.IPlayerStorage _new = this.pStorage(storagePath, false)
+                final IPlayerStorage _old = this.pStorage(storagePath, true);
+                final IPlayerStorage _new = this.pStorage(storagePath, false)
         ) {
             copyAllElements(_old, _new);
         } catch (final Throwable t) {
@@ -40,8 +40,8 @@ public class DatabaseConvert extends AbstractTask {
     @Override
     protected void runOnDimension(final Path storagePath) {
         try (
-                final IWorldStorage.IChunkStorage _old = this.cStorage(storagePath, true);
-                final IWorldStorage.IChunkStorage _new = this.cStorage(storagePath, false)
+                final IDimensionStorage _old = this.cStorage(storagePath, true);
+                final IDimensionStorage _new = this.cStorage(storagePath, false)
         ) {
             copyAllElements(_old, _new);
         } catch (final Throwable t) {
@@ -49,7 +49,7 @@ public class DatabaseConvert extends AbstractTask {
         }
     }
 
-    private <Type> void copyAllElements(final IWorldStorage<Type> source, final IWorldStorage<Type> target) {
+    private <Type> void copyAllElements(final IWorldStorage<Type> source,final IWorldStorage<Type> target) {
         final Iterator<Type> iterator;
 
         {
@@ -84,25 +84,25 @@ public class DatabaseConvert extends AbstractTask {
         return CompletableFuture.runAsync(() -> {
             LOGGER.debug("Copying {} from {} to {}", key, source, target);
             source.copyTo(key, target);
-        }, MinecraftHelper.executorPool()).exceptionally((throwable) -> {
+        }, MCHelper.executorPool()).exceptionally((throwable) -> {
             LOGGER.error("Could not copy data into new storage!", throwable);
             return null;
         });
     }
 
-    private @NotNull IWorldStorage.IChunkStorage cStorage(final Path path, final boolean old) {
+    private @NotNull IWorldStorage.IDimensionStorage cStorage(final Path path, final boolean old) {
         if (!old) {
-            return this.task == Task.TO_ANVIL ? new AnvilChunkStorage(LOGGER, path) : new CesiumChunkStorage(LOGGER, path);
+            return this.task == Task.TO_ANVIL ? new AnvilWorldStorage.DimensionStorage(path) : new CesiumWorldStorage.DimensionStorage(path);
         } else {
-            return this.task == Task.TO_ANVIL ? new CesiumChunkStorage(LOGGER, path) : new AnvilChunkStorage(LOGGER, path);
+            return this.task == Task.TO_ANVIL ? new CesiumWorldStorage.DimensionStorage(path) : new AnvilWorldStorage.DimensionStorage(path);
         }
     }
 
-    private @NotNull IWorldStorage.IPlayerStorage pStorage(final Path path, final boolean old) {
+    private @NotNull IPlayerStorage pStorage(final Path path, final boolean old) {
         if (!old) {
-            return this.task == Task.TO_ANVIL ? new AnvilPlayerStorage(LOGGER, path) : new CesiumPlayerStorage(LOGGER, path);
+            return this.task == Task.TO_ANVIL ? new AnvilWorldStorage.PlayerStorage(path) : new CesiumWorldStorage.PlayerStorage(path);
         } else {
-            return this.task == Task.TO_ANVIL ? new CesiumPlayerStorage(LOGGER, path) : new AnvilPlayerStorage(LOGGER, path);
+            return this.task == Task.TO_ANVIL ? new CesiumWorldStorage.PlayerStorage(path) : new AnvilWorldStorage.PlayerStorage(path);
         }
     }
 }

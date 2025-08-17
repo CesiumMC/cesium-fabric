@@ -1,7 +1,7 @@
 package de.yamayaki.cesium.mixin.convert_server;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import de.yamayaki.cesium.MinecraftHelper;
+import de.yamayaki.cesium.MCHelper;
 import de.yamayaki.cesium.maintenance.AbstractTask;
 import de.yamayaki.cesium.maintenance.tasks.DatabaseConvert;
 import joptsimple.OptionParser;
@@ -57,7 +57,7 @@ public class MixinMain {
 
     @Unique
     private static void doWorldConversion(final AbstractTask.Task task, final LevelStorageSource.LevelStorageAccess levelAccess, final RegistryAccess registryAccess) {
-        var databaseConvert = new DatabaseConvert(task, MinecraftHelper.createWorldInfo(registryAccess, levelAccess));
+        var databaseConvert = new DatabaseConvert(task, MCHelper.createWorldInfo(registryAccess, levelAccess));
         var logger = databaseConvert.logger();
 
         logger.info("Starting world conversion ...");

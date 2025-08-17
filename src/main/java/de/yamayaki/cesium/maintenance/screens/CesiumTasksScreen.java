@@ -1,6 +1,6 @@
 package de.yamayaki.cesium.maintenance.screens;
 
-import de.yamayaki.cesium.MinecraftHelper;
+import de.yamayaki.cesium.MCHelper;
 import de.yamayaki.cesium.maintenance.AbstractTask;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -72,7 +72,7 @@ public class CesiumTasksScreen extends Screen {
         return Button.builder(
                 Component.literal(text),
                 action -> this.minecraft.setScreen(
-                        new CesiumWorkScreen(task, MinecraftHelper.createWorldInfo(this.minecraft, this.levelAccess), this.callback)
+                        new CesiumWorkScreen(task, MCHelper.createWorldInfo(this.minecraft, this.levelAccess), this.callback)
                 )
         ).width(200).build();
     }

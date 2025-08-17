@@ -13,15 +13,17 @@ import net.minecraft.server.WorldStem;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.storage.RegionFileStorage;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.concurrent.Executor;
 
-public class MinecraftHelper {
+public class MCHelper {
     public static void writeNbt(final @NotNull DataOutput output, final @NotNull CompoundTag input) throws IOException {
         NbtIo.write(input, output);
     }
@@ -32,6 +34,14 @@ public class MinecraftHelper {
 
     public static void parseNbt(final @NotNull DataInput input, final @NotNull StreamTagVisitor scanner) throws IOException {
         NbtIo.parse(input, scanner/*? >= 1.20.4 {*/, net.minecraft.nbt.NbtAccounter.unlimitedHeap() /*?}*/);
+    }
+
+    public static void writeCompressedNbt(final @NotNull Path path, final @NotNull CompoundTag compoundTag) throws IOException {
+        NbtIo.writeCompressed(compoundTag, path/*? <= 1.20.1 {*/ /*.toFile() *//*?}*/);
+    }
+
+    public static CompoundTag readCompressedNbt(final @NotNull Path path) throws IOException {
+        return NbtIo.readCompressed(path/*? <= 1.20.1 {*/ /*.toFile() *//*?}*/ /*? >= 1.20.4 {*/, net.minecraft.nbt.NbtAccounter.unlimitedHeap() /*?}*/);
     }
 
     /*
@@ -63,6 +73,14 @@ public class MinecraftHelper {
                 .toArray(WorldInfo.DimensionInfo[]::new);
 
         return new WorldInfo(levelAccess.getDimensionPath(Level.OVERWORLD), dimensions);
+    }
+
+    public static RegionFileStorage openRegionStorage(final Path path) {
+        /*? >=1.20.6 {*/
+        var regionInfo = new net.minecraft.world.level.chunk.storage.RegionStorageInfo("cesium", null, path.getParent().getFileName().toString());
+        /*?}*/
+        
+        return new RegionFileStorage(/*? >=1.20.6 {*/regionInfo, /*?}*/path, false);
     }
 
     public static Executor executorPool() {
