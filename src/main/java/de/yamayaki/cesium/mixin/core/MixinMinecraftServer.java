@@ -25,25 +25,25 @@ import java.util.function.BooleanSupplier;
 @Mixin(MinecraftServer.class)
 @MixinEnvironment(type = MixinEnvironment.Env.SERVER)
 public abstract class MixinMinecraftServer {
-    @Shadow
-    private PlayerList playerList;
+    @Shadow private PlayerList playerList;
+    @Shadow @Final private Map<ResourceKey<Level>, ServerLevel> levels;
+    @Shadow public abstract PlayerList getPlayerList();
 
-    @Shadow
-    @Final
-    private Map<ResourceKey<Level>, ServerLevel> levels;
+    @Unique private ExecutorService saveExecutor = null;
+    @Unique private CompletableFuture<Void> saveFuture = null;
 
-    @Shadow
-    public abstract PlayerList getPlayerList();
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void startExecutor(final CallbackInfo ci) {
+        if (this.saveExecutor != null) {
+            throw new IllegalStateException("Save Executor already set!");
+        }
 
-    @Unique
-    private final ExecutorService saveExecutor = Executors.newSingleThreadExecutor(r -> new Thread(r, "Cesium-Async-Save"));
-
-    @Unique
-    private CompletableFuture<Void> saveFuture = null;
+        this.saveExecutor = Executors.newSingleThreadExecutor(r -> new Thread(r, "Cesium-Async-Save"));
+    }
 
     @Inject(method = "tickServer", at = @At("RETURN"))
-    public void cesium$saveData(BooleanSupplier booleanSupplier, CallbackInfo ci) {
-        if (this.saveFuture != null && !this.saveFuture.isDone()) {
+    public void cesium$saveData(final BooleanSupplier booleanSupplier, final CallbackInfo ci) {
+        if (this.saveExecutor == null || (this.saveFuture != null && !this.saveFuture.isDone())) {
             return;
         }
 
@@ -71,11 +71,14 @@ public abstract class MixinMinecraftServer {
     }
 
     @Inject(method = "stopServer", at = @At("TAIL"))
-    public void cesium$stopThread(CallbackInfo ci) {
+    public void cesium$stopThread(final CallbackInfo ci) {
         if (this.saveFuture != null) {
             this.saveFuture.join();
         }
 
+        this.saveFuture = null;
+
         this.saveExecutor.shutdown();
+        this.saveExecutor = null;
     }
 }

@@ -10,6 +10,7 @@ import joptsimple.OptionSpec;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.Main;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,11 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Main.class)
 public class MixinMain {
-    @Unique
-    private static OptionSpec<Void> cesium$convertOptionAnvil;
-
-    @Unique
-    private static OptionSpec<Void> cesium$convertOptionCesium;
+    @Unique private static OptionSpec<String> cesium$convertOption;
 
     @Inject(
             method = "main",
@@ -33,52 +30,58 @@ public class MixinMain {
             ),
             remap = false
     )
-    private static void addConvertOption(String[] strings, CallbackInfo ci, @Local(ordinal = 0) OptionParser optionParser) {
-        cesium$convertOptionAnvil = optionParser.accepts("cesiumConvertToAnvil");
-        cesium$convertOptionCesium = optionParser.accepts("cesiumConvertToCesium");
+    private static void addConvertOption(
+            final String[] strings, final CallbackInfo ci, final @Local(ordinal = 0) OptionParser optionParser
+    ) {
+        cesium$convertOption = optionParser.accepts("cesiumConvertTo").withRequiredArg();
     }
 
     @Inject(
             method = "main",
             at = @At(
                     value = "INVOKE_ASSIGN",
-                    target = "Lnet/minecraft/core/LayeredRegistryAccess;compositeAccess()Lnet/minecraft/core/RegistryAccess$Frozen;",
-                    shift = At.Shift.AFTER
+                    target = "Lnet/minecraft/core/LayeredRegistryAccess;compositeAccess()Lnet/minecraft/core/RegistryAccess$Frozen;"
             )
     )
-    private static void doConvert(String[] strings, CallbackInfo ci, @Local OptionSet optionSet, @Local LevelStorageSource.LevelStorageAccess levelAccess, @Local RegistryAccess.Frozen registryAccess) {
-        final boolean convertAnvil;
-
-        if ((convertAnvil = optionSet.has(cesium$convertOptionAnvil)) || optionSet.has(cesium$convertOptionCesium)) {
-            final AbstractTask.Task task = convertAnvil ? AbstractTask.Task.TO_ANVIL : AbstractTask.Task.TO_CESIUM;
-            doWorldConversion(task, levelAccess, registryAccess);
+    private static void doConvert(
+            final String[] strings, final CallbackInfo ci, final @Local OptionSet optionSet,
+            final @Local LevelStorageSource.LevelStorageAccess levelAccess,final @Local RegistryAccess.Frozen registryAccess
+    ) {
+        if (!optionSet.has(cesium$convertOption)) {
+            return;
         }
+
+        final String argument = optionSet.valueOf(cesium$convertOption);
+
+        final AbstractTask.Task task = switch (argument) {
+            case "cesium" -> AbstractTask.Task.TO_CESIUM;
+            case "anvil" -> AbstractTask.Task.TO_ANVIL;
+            default -> throw new IllegalStateException("Unexpected value: " + optionSet.valueOf(cesium$convertOption));
+        };
+
+        doWorldConversion(task, levelAccess, registryAccess);
     }
 
     @Unique
-    private static void doWorldConversion(final AbstractTask.Task task, final LevelStorageSource.LevelStorageAccess levelAccess, final RegistryAccess registryAccess) {
-        var databaseConvert = new DatabaseConvert(task, MCHelper.createWorldInfo(registryAccess, levelAccess));
-        var logger = databaseConvert.logger();
+    private static void doWorldConversion(
+            final AbstractTask.Task task,
+            final LevelStorageSource.LevelStorageAccess levelAccess,
+            final RegistryAccess registryAccess
+    ) {
+        final DatabaseConvert converter = new DatabaseConvert(task, MCHelper.createWorldInfo(registryAccess, levelAccess));
+        final Logger logger = converter.logger();
 
         logger.info("Starting world conversion ...");
 
-        String previousStatus = null;
-        String currentStatus;
+        while (converter.running()) {
+            final double percentage = Math.floor(converter.percentage() * 100);
 
-        while (databaseConvert.running()) {
-            currentStatus = databaseConvert.status();
+            final int total = converter.totalElements();
+            final int current = converter.currentElement();
 
-            if (currentStatus != null && !currentStatus.equals(previousStatus)) {
-                previousStatus = currentStatus;
-                logger.info(currentStatus);
-            }
+            logger.info("{}% completed ({} / {} elements) ...", percentage, current, total);
 
-            logger.info("{}% completed ({} / {} elements) ...", Math.floor(databaseConvert.percentage() * 100), databaseConvert.currentElement(), databaseConvert.totalElements());
-
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException ignored) {
-            }
+            try { Thread.sleep(200L); } catch (final InterruptedException ignored) { }
         }
     }
 }
