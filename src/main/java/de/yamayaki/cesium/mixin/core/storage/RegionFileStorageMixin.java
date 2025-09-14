@@ -17,7 +17,7 @@ public abstract class RegionFileStorageMixin implements RawAccess {
     protected abstract RegionFile getRegionFile(ChunkPos chunkPos) throws IOException;
 
     @Override
-    public byte[] cesium$getBytes(final ChunkPos chunkPos) throws IOException {
+    public synchronized byte[] cesium$getBytes(final ChunkPos chunkPos) throws IOException {
         final RegionFile regionFile = this.getRegionFile(chunkPos);
 
         try (final DataInputStream dos = regionFile.getChunkDataInputStream(chunkPos)) {
@@ -30,7 +30,7 @@ public abstract class RegionFileStorageMixin implements RawAccess {
     }
 
     @Override
-    public void cesium$putBytes(final ChunkPos chunkPos, byte[] bytes) throws IOException {
+    public synchronized void cesium$putBytes(final ChunkPos chunkPos, byte[] bytes) throws IOException {
         final RegionFile regionFile = this.getRegionFile(chunkPos);
 
         if (bytes == null) {
