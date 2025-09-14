@@ -19,10 +19,8 @@
       "de.yamayaki.cesium.CesiumMod"
     ]
   },
-  "mixins": [
-    "cesium/mixins/${mixins_file}"
-  ],
-  "accessWidener": "cesium/accesswideners/${aw_file}",
+  "mixins": ["cesium.mixins.json"],
+  "accessWidener": "cesium/${aw_file}",
   "depends": {
     "fabricloader": ">=${v_fabric}",
     "minecraft": "${v_minecraft}"

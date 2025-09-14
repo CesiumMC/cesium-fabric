@@ -1,8 +1,12 @@
 import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
+    kotlin("jvm") version "2.2.10"
+    id("com.google.devtools.ksp") version "2.2.10-2.0.2"
+
     id("fabric-loom") version "1.11.7"
-    id("dev.kikugie.stonecutter") version "0.7.8"
+    id("dev.kikugie.fletching-table.fabric") version "0.1.0-alpha.17"
+    id("dev.kikugie.stonecutter") version "0.7.10"
 }
 
 base.archivesName.set("${project.property("archives_base_name")}+${stonecutter.current.project}")
@@ -44,18 +48,19 @@ val accessWidenerFile = when {
     else -> "1.20.1"
 } + ".aw"
 
-val mixinsFile = when {
-    stonecutter.eval(stonecutter.current.version, ">=1.20.6") -> "1.20.6"
-    else -> "1.20.1"
-} + ".mixins.json"
-
 loom {
     runConfigs.all {
         ideConfigGenerated(true)
         runDir = "../../run"
     }
 
-    accessWidenerPath = file("../../src/main/resources/cesium/accesswideners/$accessWidenerFile")
+    accessWidenerPath = file("../../src/main/resources/cesium/$accessWidenerFile")
+}
+
+fletchingTable {
+    mixins.create("main") {
+        mixin("default", "cesium.mixins.json")
+    }
 }
 
 tasks.processResources {
@@ -65,8 +70,7 @@ tasks.processResources {
         "v_minecraft" to stonecutter.current.project,
         "v_mod" to project.property("mod_version"),
         "v_fabric" to project.property("loader_version"),
-        "aw_file" to accessWidenerFile,
-        "mixins_file" to mixinsFile
+        "aw_file" to accessWidenerFile
     )
 
     filesMatching("fabric.mod.json") {

@@ -1,6 +1,7 @@
 package de.yamayaki.cesium.mixin.gui;
 
 import de.yamayaki.cesium.maintenance.screens.CesiumTasksScreen;
+import dev.kikugie.fletching_table.annotation.MixinEnvironment;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -15,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EditWorldScreen.class)
+@MixinEnvironment(type = MixinEnvironment.Env.CLIENT)
 public abstract class MixinEditWorldScreen extends Screen {
     @Shadow @Final private LevelStorageSource.LevelStorageAccess levelAccess;
     @Shadow @Final private BooleanConsumer callback;

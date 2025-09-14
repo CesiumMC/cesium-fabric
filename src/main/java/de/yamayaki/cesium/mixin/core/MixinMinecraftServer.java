@@ -2,6 +2,7 @@ package de.yamayaki.cesium.mixin.core;
 
 import de.yamayaki.cesium.CesiumMod;
 import de.yamayaki.cesium.accessor.DatabaseSource;
+import dev.kikugie.fletching_table.annotation.MixinEnvironment;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -22,6 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.function.BooleanSupplier;
 
 @Mixin(MinecraftServer.class)
+@MixinEnvironment(type = MixinEnvironment.Env.SERVER)
 public abstract class MixinMinecraftServer {
     @Shadow
     private PlayerList playerList;

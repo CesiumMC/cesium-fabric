@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import de.yamayaki.cesium.CesiumMod;
 import de.yamayaki.cesium.accessor.DatabaseSource;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
+import dev.kikugie.fletching_table.annotation.MixinEnvironment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.resources.ResourceKey;
@@ -19,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 
 @Mixin(DebugScreenOverlay.class)
+@MixinEnvironment(type = MixinEnvironment.Env.CLIENT)
 public class MixinDebugScreenOverlay {
     @Inject(method = "getSystemInformation", at = @At("RETURN"))
     private void cesium$addDebugInfo(CallbackInfoReturnable<List<String>> cir, @Local List<String> list) {
