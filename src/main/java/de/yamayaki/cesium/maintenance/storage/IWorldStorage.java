@@ -17,8 +17,8 @@ public interface IWorldStorage<Type> extends ICopyable<Type>, AutoCloseable {
         @NotNull IAbstractData<ChunkPos, byte @Nullable []> entity();
 
         @Override
-        default void copyTo(final @NotNull ChunkPos key, final @NotNull ICopyable<ChunkPos> copyable) {
-            if (!(copyable instanceof IWorldStorage.IDimensionStorage to)) {
+        default void copyTo(final @NotNull ChunkPos key, final @NotNull ICopyable<ChunkPos> target) {
+            if (!(target instanceof IWorldStorage.IDimensionStorage to)) {
                 throw new UnsupportedOperationException("Can only copy from and to chunk storage!");
             }
 
@@ -36,8 +36,8 @@ public interface IWorldStorage<Type> extends ICopyable<Type>, AutoCloseable {
         @NotNull IAbstractData<UUID, String> statistics();
 
         @Override
-        default void copyTo(final @NotNull UUID key, final @NotNull ICopyable<UUID> copyable) {
-            if (!(copyable instanceof IPlayerStorage to)) {
+        default void copyTo(final @NotNull UUID key, final @NotNull ICopyable<UUID> target) {
+            if (!(target instanceof IPlayerStorage to)) {
                 throw new UnsupportedOperationException("Can only copy from and to player storage!");
             }
 
