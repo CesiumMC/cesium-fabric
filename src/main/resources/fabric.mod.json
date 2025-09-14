@@ -24,7 +24,7 @@
   ],
   "accessWidener": "cesium/accesswideners/${aw_file}",
   "depends": {
-    "fabricloader": "${v_fabric}",
+    "fabricloader": ">=${v_fabric}",
     "minecraft": "${v_minecraft}"
   },
   "breaks": {
