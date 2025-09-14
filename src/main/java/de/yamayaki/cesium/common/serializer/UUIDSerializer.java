@@ -1,11 +1,12 @@
 package de.yamayaki.cesium.common.serializer;
 
 import de.yamayaki.cesium.api.ISerializer;
+import de.yamayaki.cesium.api.ISerializer.KeySerializer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class UUIDSerializer implements ISerializer<UUID> {
+public class UUIDSerializer implements KeySerializer<UUID> {
     @Override
     public byte @NotNull [] serialize(final @NotNull UUID input) {
         final byte[] array = new byte[16];

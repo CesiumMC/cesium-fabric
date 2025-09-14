@@ -1,5 +1,6 @@
 package de.yamayaki.cesium.common.lmdb;
 
+import de.yamayaki.cesium.api.ISerializer.KeySerializer;
 import de.yamayaki.cesium.common.DatabaseSpec;
 import de.yamayaki.cesium.api.ICompressor;
 import de.yamayaki.cesium.api.IScannable;
@@ -28,7 +29,7 @@ public class KVDatabase<K, V> {
     private final Env<byte[]> env;
     private final Dbi<byte[]> dbi;
 
-    private final ISerializer<K> keySerializer;
+    private final KeySerializer<K> keySerializer;
     private final ISerializer<V> valueSerializer;
 
     private final ICompressor compressor;
@@ -39,7 +40,14 @@ public class KVDatabase<K, V> {
         this.env = this.storage.env;
         this.dbi = this.env.openDbi(spec.name(), DbiFlags.MDB_CREATE);
 
-        this.keySerializer = DefaultSerializers.getSerializer(spec.key());
+        final ISerializer<K> keySerializer = DefaultSerializers.getSerializer(spec.key());
+
+        if(!(keySerializer instanceof KeySerializer<K> kSerializer)) {
+            throw new IllegalArgumentException("Invalid KeySerializer for type: " + spec.key().getName());
+        }
+
+        this.keySerializer = kSerializer;
+
         this.valueSerializer = DefaultSerializers.getSerializer(spec.value());
 
         this.compressor = isUncompressed ? DefaultCompressors.NONE : DefaultCompressors.ZSTD;
@@ -67,11 +75,7 @@ public class KVDatabase<K, V> {
                 .lock();
 
         try {
-            try {
-                buf = this.dbi.get(this.env.txnRead(), this.keySerializer.serialize(key));
-            } catch (final IOException e) {
-                throw new RuntimeException("Failed to deserialize key", e);
-            }
+            buf = this.dbi.get(this.env.txnRead(), this.keySerializer.serialize(key));
         } finally {
             lock.readLock()
                     .unlock();
@@ -165,16 +169,12 @@ public class KVDatabase<K, V> {
     }
 
     private void dbiPutDelete(final Txn<byte[]> txn, final K key, final byte @Nullable [] value) {
-        try {
-            final byte[] serializedKey = this.keySerializer.serialize(key);
+        final byte[] serializedKey = this.keySerializer.serialize(key);
 
-            if (value == null) {
-                this.dbi.delete(txn, serializedKey);
-            } else {
-                this.dbi.put(txn, serializedKey, value);
-            }
-        } catch (final IOException e) {
-            throw new RuntimeException("Could not serialize key", e);
+        if (value == null) {
+            this.dbi.delete(txn, serializedKey);
+        } else {
+            this.dbi.put(txn, serializedKey, value);
         }
     }
 

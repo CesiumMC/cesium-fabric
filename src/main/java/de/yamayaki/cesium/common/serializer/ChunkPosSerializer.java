@@ -1,10 +1,10 @@
 package de.yamayaki.cesium.common.serializer;
 
-import de.yamayaki.cesium.api.ISerializer;
+import de.yamayaki.cesium.api.ISerializer.KeySerializer;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.NotNull;
 
-public class ChunkPosSerializer implements ISerializer<ChunkPos> {
+public class ChunkPosSerializer implements KeySerializer<ChunkPos> {
     @Override
     public byte @NotNull [] serialize(final @NotNull ChunkPos input) {
         final int x = input.x;

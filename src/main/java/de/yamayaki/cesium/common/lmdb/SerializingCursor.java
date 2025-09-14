@@ -1,18 +1,17 @@
 package de.yamayaki.cesium.common.lmdb;
 
-import de.yamayaki.cesium.api.ISerializer;
+import de.yamayaki.cesium.api.ISerializer.KeySerializer;
 import org.lmdbjava.Cursor;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 public class SerializingCursor<K> implements Iterator<K>, AutoCloseable {
     private final Cursor<byte[]> cursor;
-    private final ISerializer<K> serializer;
+    private final KeySerializer<K> serializer;
 
     private boolean hasNext;
 
-    public SerializingCursor(final Cursor<byte[]> cursor, final ISerializer<K> serializer) {
+    public SerializingCursor(final Cursor<byte[]> cursor, final KeySerializer<K> serializer) {
         this.cursor = cursor;
         this.serializer = serializer;
 
@@ -26,15 +25,11 @@ public class SerializingCursor<K> implements Iterator<K>, AutoCloseable {
 
     @Override
     public K next() {
-        try {
-            final K key = this.serializer.deserialize(this.cursor.key());
+        final K key = this.serializer.deserialize(this.cursor.key());
 
-            this.hasNext = this.cursor.next();
+        this.hasNext = this.cursor.next();
 
-            return key;
-        } catch (final IOException e) {
-            throw new RuntimeException("Could not deserialize key", e);
-        }
+        return key;
     }
 
     @Override
