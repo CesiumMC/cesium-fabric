@@ -6,6 +6,7 @@ import de.yamayaki.cesium.api.database.IDBInstance;
 import de.yamayaki.cesium.common.spec.PlayerDatabaseSpecs;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,7 +40,7 @@ public class MixinPlayerDataStorage implements DatabaseSetter {
     }
 
     @Redirect(
-            method = "load(Lnet/minecraft/world/entity/player/Player;Ljava/lang/String;)Ljava/util/Optional;",
+            method = "load(Lnet/minecraft/server/players/NameAndId;Ljava/lang/String;)Ljava/util/Optional;",
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/io/File;exists()Z"
@@ -50,7 +51,7 @@ public class MixinPlayerDataStorage implements DatabaseSetter {
     }
 
     @Redirect(
-            method = "load(Lnet/minecraft/world/entity/player/Player;Ljava/lang/String;)Ljava/util/Optional;",
+            method = "load(Lnet/minecraft/server/players/NameAndId;Ljava/lang/String;)Ljava/util/Optional;",
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/io/File;isFile()Z"
@@ -61,16 +62,16 @@ public class MixinPlayerDataStorage implements DatabaseSetter {
     }
 
     @Redirect(
-            method = "load(Lnet/minecraft/world/entity/player/Player;Ljava/lang/String;)Ljava/util/Optional;",
+            method = "load(Lnet/minecraft/server/players/NameAndId;Ljava/lang/String;)Ljava/util/Optional;",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/nbt/NbtIo;readCompressed(Ljava/nio/file/Path;Lnet/minecraft/nbt/NbtAccounter;)Lnet/minecraft/nbt/CompoundTag;"
             )
     )
-    public CompoundTag redirectPlayerLoad(Path path, NbtAccounter nbtAccounter, @Local(argsOnly = true) Player player) {
+    public CompoundTag redirectPlayerLoad(Path path, NbtAccounter nbtAccounter, @Local(argsOnly = true) NameAndId nameAndId) {
         return this.database
                 .getDatabase(PlayerDatabaseSpecs.PLAYER_DATA)
-                .getValue(player.getUUID());
+                .getValue(nameAndId.id());
     }
 
     @Redirect(

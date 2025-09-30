@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Mixin(targets = "net.minecraft.util.worldupdate.WorldUpgrader$AbstractUpgrader")
+@Mixin(net.minecraft.util.worldupdate.WorldUpgrader.AbstractUpgrader.class)
 public abstract class MixinWorldUpgrader {
     @Shadow
     protected abstract boolean processOnePosition(ResourceKey<Level> resourceKey, AutoCloseable autoCloseable, ChunkPos chunkPos);

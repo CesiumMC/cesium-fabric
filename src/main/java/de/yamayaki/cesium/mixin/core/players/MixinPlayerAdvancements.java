@@ -10,6 +10,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -36,6 +38,10 @@ public abstract class MixinPlayerAdvancements implements DatabaseSetter {
     @Shadow
     protected abstract void load(ServerAdvancementManager serverAdvancementManager);
 
+    @Shadow
+    @Final
+    private PlayerList playerList;
+
     @Unique
     private IDBInstance database;
 
@@ -54,10 +60,10 @@ public abstract class MixinPlayerAdvancements implements DatabaseSetter {
     public void cesium$setStorage(IDBInstance storage) {
         this.database = storage;
 
-        MinecraftServer server = this.player.getServer();
-        if (server != null) {
-            this.load(server.getAdvancements());
-        }
+
+        MinecraftServer server = this.playerList.getServer();
+
+        this.load(server.getAdvancements());
     }
 
     @Redirect(
