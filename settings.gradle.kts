@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.maven
+
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -5,6 +7,11 @@ pluginManagement {
         maven {
             name = "Fabric"
             url = uri("https://maven.fabricmc.net/")
+        }
+
+        maven {
+            name = "Kikugie"
+            url = uri("https://maven.kikugie.dev/snapshots/");
         }
     }
 }

@@ -17,6 +17,10 @@ group = project.property("maven_group").toString()
 repositories {
     mavenLocal()
     mavenCentral()
+    maven {
+        name = "Kikugie"
+        url = uri("https://maven.kikugie.dev/snapshots/");
+    }
 }
 
 dependencies {
