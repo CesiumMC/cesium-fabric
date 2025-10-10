@@ -89,7 +89,7 @@ java {
     sourceCompatibility = java
 
     toolchain {
-        languageVersion = JavaLanguageVersion.of(java.majorVersion)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
