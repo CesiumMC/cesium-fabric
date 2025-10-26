@@ -5,8 +5,10 @@ import de.yamayaki.cesium.accessor.DatabaseSetter;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import de.yamayaki.cesium.common.spec.PlayerDatabaseSpecs;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.PlayerDataStorage;
+//? <= 1.20.6 {
+/*import net.minecraft.world.entity.player.Player;
+*///?}
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,9 +37,11 @@ public class MixinPlayerDataStorage implements DatabaseSetter {
     }
 
     @Redirect(
-            //? >= 1.20.6 {
-            method = "load(Lnet/minecraft/world/entity/player/Player;Ljava/lang/String;)Ljava/util/Optional;",
-            //?} else {
+            //? if >= 1.21.9 {
+            method = "load(Lnet/minecraft/server/players/NameAndId;Ljava/lang/String;)Ljava/util/Optional;",
+            //?} elif >= 1.20.6 {
+            /*method = "load(Lnet/minecraft/world/entity/player/Player;Ljava/lang/String;)Ljava/util/Optional;",
+            *///?} else {
             /*method = "load(Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/nbt/CompoundTag;",
             *///?}
             at = @At(
@@ -50,9 +54,11 @@ public class MixinPlayerDataStorage implements DatabaseSetter {
     }
 
     @Redirect(
-            //? >= 1.20.6 {
-            method = "load(Lnet/minecraft/world/entity/player/Player;Ljava/lang/String;)Ljava/util/Optional;",
-            //?} else {
+            //? if >= 1.21.9 {
+            method = "load(Lnet/minecraft/server/players/NameAndId;Ljava/lang/String;)Ljava/util/Optional;",
+            //?} elif >= 1.20.6 {
+            /*method = "load(Lnet/minecraft/world/entity/player/Player;Ljava/lang/String;)Ljava/util/Optional;",
+            *///?} else {
             /*method = "load",
             *///?}
             at = @At(
@@ -65,9 +71,11 @@ public class MixinPlayerDataStorage implements DatabaseSetter {
     }
 
     @Redirect(
-            //? >= 1.20.6 {
-            method = "load(Lnet/minecraft/world/entity/player/Player;Ljava/lang/String;)Ljava/util/Optional;",
-            //?} else {
+            //? if >= 1.21.9 {
+            method = "load(Lnet/minecraft/server/players/NameAndId;Ljava/lang/String;)Ljava/util/Optional;",
+            //?} elif >= 1.20.6 {
+            /*method = "load(Lnet/minecraft/world/entity/player/Player;Ljava/lang/String;)Ljava/util/Optional;",
+            *///?} else {
             /*method = "load",
             *///?}
             at = @At(
@@ -80,13 +88,20 @@ public class MixinPlayerDataStorage implements DatabaseSetter {
             )
     )
     //? >= 1.20.4 {
-    public CompoundTag redirectPlayerLoad(java.nio.file.Path path, net.minecraft.nbt.NbtAccounter nbtAccounter, @Local(argsOnly = true) Player player) {
+    public CompoundTag redirectPlayerLoad(
+            java.nio.file.Path path, net.minecraft.nbt.NbtAccounter nbtAccounter,
+            //? if >= 1.21.9 {
+            @Local(argsOnly = true) net.minecraft.server.players.NameAndId player
+            //?} else {
+            /*@Local(argsOnly = true) net.minecraft.world.entity.player.Player player
+            *///?}
+    ) {
     //?} else {
     /*public CompoundTag redirectPlayerLoad(File file, @Local(argsOnly = true) Player player) {
     *///?}
         return this.database
                 .getDatabase(PlayerDatabaseSpecs.PLAYER_DATA)
-                .getValue(player.getUUID());
+                .getValue(player/*? >= 1.21.9 {*/ .id() /*?} else {*/ /*.getUUID() *//*?}*/);
     }
 
     @Redirect(
@@ -120,7 +135,7 @@ public class MixinPlayerDataStorage implements DatabaseSetter {
             )
     )
     //? >= 1.20.4 {
-    public void redirectWrite(CompoundTag compoundTag, java.nio.file.Path path, @Local(argsOnly = true) Player player) {
+    public void redirectWrite(CompoundTag compoundTag, java.nio.file.Path path, @Local(argsOnly = true) net.minecraft.world.entity.player.Player player) {
     //?} else {
     /*public void redirectWrite(CompoundTag compoundTag, File file, @Local(argsOnly = true) Player player) {
     *///?}

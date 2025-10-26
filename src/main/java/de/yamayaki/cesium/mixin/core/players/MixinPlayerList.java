@@ -9,6 +9,9 @@ import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerPlayer;
+//? >= 1.21.9 {
+import net.minecraft.server.notifications.NotificationService;
+//?}
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.world.entity.player.Player;
@@ -35,7 +38,11 @@ public class MixinPlayerList implements DatabaseSource {
     private LMDBInstance database;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void initCesiumPlayers(MinecraftServer minecraftServer, LayeredRegistryAccess<?> layeredRegistryAccess, PlayerDataStorage playerDataStorage, int i, CallbackInfo ci) {
+    //? < 1.21.9 {
+    /*private void initCesiumPlayers(MinecraftServer minecraftServer, LayeredRegistryAccess<?> layeredRegistryAccess, PlayerDataStorage playerDataStorage, int i, CallbackInfo ci) {
+    *///?} else {
+    private void initCesiumPlayers(MinecraftServer minecraftServer, LayeredRegistryAccess<?> layeredRegistryAccess, PlayerDataStorage playerDataStorage, NotificationService notificationService, CallbackInfo ci) {
+    //?}
         final Path path = minecraftServer.getWorldPath(LevelResource.PLAYER_ADVANCEMENTS_DIR).getParent();
 
         this.database = CesiumMod.openPlayerDB(path);

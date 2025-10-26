@@ -1,6 +1,7 @@
 package de.yamayaki.cesium.mixin.gui;
 
-import com.llamalad7.mixinextras.sugar.Local;
+//? < 1.21.9 {
+/*import com.llamalad7.mixinextras.sugar.Local;
 import de.yamayaki.cesium.CesiumMod;
 import de.yamayaki.cesium.accessor.DatabaseSource;
 import de.yamayaki.cesium.common.lmdb.LMDBInstance;
@@ -21,8 +22,10 @@ import java.util.List;
 
 @Mixin(DebugScreenOverlay.class)
 @MixinEnvironment(type = MixinEnvironment.Env.CLIENT)
+*///?}
 public class MixinDebugScreenOverlay {
-    @Inject(method = "getSystemInformation", at = @At("RETURN"))
+    //? < 1.21.9 {
+    /*@Inject(method = "getSystemInformation", at = @At("RETURN"))
     private void cesium$addDebugInfo(CallbackInfoReturnable<List<String>> cir, @Local List<String> list) {
         if (!CesiumMod.config().showDebugInfo()) {
             return;
@@ -60,5 +63,5 @@ public class MixinDebugScreenOverlay {
         list.add("ms_leaf_pages: " + ms_leaf_pages);
         list.add("ms_entries: " + ms_entries);
     }
-
+    *///?}
 }

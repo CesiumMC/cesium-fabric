@@ -6,7 +6,9 @@ import de.yamayaki.cesium.common.lmdb.LMDBInstance;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.progress.ChunkProgressListener;
+//? < 1.21.9 {
+/*import net.minecraft.server.level.progress.ChunkProgressListener;
+ *///?}
 import net.minecraft.world.RandomSequences;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.storage.LevelStorageSource;
@@ -33,7 +35,7 @@ public class MixinServerLevel implements DatabaseSource {
                     shift = At.Shift.AFTER
             )
     )
-    public void initCesiumChunkStorage(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, ResourceKey resourceKey, LevelStem levelStem, ChunkProgressListener chunkProgressListener, boolean bl, long l, List list, boolean bl2, RandomSequences randomSequences, CallbackInfo ci) {
+    public void initCesiumChunkStorage(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, ResourceKey resourceKey, LevelStem levelStem, /*? < 1.21.9 {*/ /*ChunkProgressListener chunkProgressListener, *//*?}*/ boolean bl, long l, List list, boolean bl2, RandomSequences randomSequences, CallbackInfo ci) {
         this.database = CesiumMod.openWorldDB(levelStorageAccess.getDimensionPath(resourceKey));
     }
 
