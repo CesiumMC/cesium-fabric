@@ -3,7 +3,9 @@ package de.yamayaki.cesium.mixin.core.chunks;
 import com.mojang.datafixers.DataFixer;
 import de.yamayaki.cesium.api.accessor.DatabaseSetter;
 import de.yamayaki.cesium.api.accessor.DatabaseSource;
+import de.yamayaki.cesium.api.accessor.SpecificationSetter;
 import de.yamayaki.cesium.api.database.IDBInstance;
+import de.yamayaki.cesium.common.spec.WorldDatabaseSpecs;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.thread.BlockableEventLoop;
@@ -34,10 +36,9 @@ public class MixinChunkMap {
     private void setCesiumDB(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureTemplateManager structureTemplateManager, Executor executor, BlockableEventLoop blockableEventLoop, LightChunkGetter lightChunkGetter, ChunkGenerator chunkGenerator, ChunkStatusUpdateListener chunkStatusUpdateListener, Supplier supplier, TicketStorage ticketStorage, int i, boolean bl, CallbackInfo ci) {
         IDBInstance database = ((DatabaseSource) serverLevel).cesium$getStorage();
 
-        ((DatabaseSetter) this.poiManager)
-                .cesium$setStorage(database);
+        ((DatabaseSetter) this.poiManager).cesium$setStorage(database);
 
-        ((DatabaseSetter) this)
-                .cesium$setStorage(database);
+        ((DatabaseSetter) this).cesium$setStorage(database);
+        ((SpecificationSetter) this).cesium$setSpec(WorldDatabaseSpecs.CHUNK_DATA);
     }
 }

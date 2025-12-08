@@ -39,7 +39,7 @@ public class DatabaseCompact extends AbstractTask {
 
         final IDBInstance dbInstance = CesiumMod.openWorldDB(dimensionPath);
 
-        this.status.set("Compacting level data for " + level.location().getPath());
+        this.status.set("Compacting level data for " + level.identifier().getPath());
 
         try {
             dbInstance.createCopy(copyPath);

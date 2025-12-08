@@ -15,6 +15,7 @@ import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
+import net.minecraft.world.level.chunk.storage.SimpleRegionStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -32,7 +33,7 @@ import java.util.Map;
 @Mixin(net.minecraft.util.worldupdate.WorldUpgrader.AbstractUpgrader.class)
 public abstract class MixinWorldUpgrader {
     @Shadow
-    protected abstract boolean processOnePosition(ResourceKey<Level> resourceKey, AutoCloseable autoCloseable, ChunkPos chunkPos);
+    protected abstract boolean processOnePosition(ResourceKey<Level> resourceKey, SimpleRegionStorage simpleRegionStorage, ChunkPos chunkPos);
 
     @Unique
     private IDBInstance tmpDatabase;
@@ -47,32 +48,32 @@ public abstract class MixinWorldUpgrader {
             method = "upgrade",
             at = @At(
                     value = "INVOKE",
-                    target = "Ljava/lang/AutoCloseable;close()V"
+                    target = "Lnet/minecraft/world/level/chunk/storage/SimpleRegionStorage;close()V"
             )
     )
-    public void cesiumClose(AutoCloseable instance) throws Exception {
-        if (instance instanceof DatabaseActions databaseActions) {
+    public void cesiumClose(SimpleRegionStorage simpleRegionStorage) throws Exception {
+        if (simpleRegionStorage instanceof DatabaseActions databaseActions) {
             databaseActions.cesium$close();
         }
 
-        instance.close();
+        simpleRegionStorage.close();
     }
 
     @Redirect(
             method = "upgrade",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/util/worldupdate/WorldUpgrader$AbstractUpgrader;processOnePosition(Lnet/minecraft/resources/ResourceKey;Ljava/lang/AutoCloseable;Lnet/minecraft/world/level/ChunkPos;)Z"
+                    target = "Lnet/minecraft/util/worldupdate/WorldUpgrader$AbstractUpgrader;processOnePosition(Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/level/chunk/storage/SimpleRegionStorage;Lnet/minecraft/world/level/ChunkPos;)Z"
             )
     )
-    public boolean cesiumFlush(WorldUpgrader.AbstractUpgrader<?> instance, ResourceKey<Level> resourceKey, AutoCloseable autoCloseable, ChunkPos chunkPos) {
-        if (chunkCount % 1024 == 0 && autoCloseable instanceof DatabaseActions databaseActions) {
+    public boolean cesiumFlush(WorldUpgrader.AbstractUpgrader instance, ResourceKey<Level> resourceKey, SimpleRegionStorage simpleRegionStorage, ChunkPos chunkPos) {
+        if (chunkCount % 1024 == 0 && simpleRegionStorage instanceof DatabaseActions databaseActions) {
             databaseActions.cesium$flush();
         }
 
         chunkCount++;
 
-        return this.processOnePosition(resourceKey, autoCloseable, chunkPos);
+        return this.processOnePosition(resourceKey, simpleRegionStorage, chunkPos);
     }
 
 
@@ -84,7 +85,7 @@ public abstract class MixinWorldUpgrader {
                     shift = At.Shift.BY
             )
     )
-    public <T extends AutoCloseable> void cesiumCreate(CallbackInfoReturnable<List<WorldUpgrader.DimensionToUpgrade<T>>> cir, @Local Path path, @Local RegionStorageInfo regionStorageInfo, @Local AutoCloseable autoCloseable) {
+    public <T extends AutoCloseable> void cesiumCreate(CallbackInfoReturnable<List<WorldUpgrader.DimensionToUpgrade>> cir, @Local Path path, @Local RegionStorageInfo regionStorageInfo, @Local SimpleRegionStorage simpleRegionStorage) {
         IDBInstance dbInstance = CesiumMod.openWorldDB(path.getParent());
         tmpDatabase = dbInstance;
 
@@ -96,9 +97,9 @@ public abstract class MixinWorldUpgrader {
         };
         tmpSpec = databaseSpec;
 
-        ((DatabaseSetter) autoCloseable).cesium$setStorage(dbInstance);
-        if (autoCloseable instanceof SpecificationSetter) {
-            ((SpecificationSetter) autoCloseable).cesium$setSpec(databaseSpec);
+        ((DatabaseSetter) simpleRegionStorage).cesium$setStorage(dbInstance);
+        if (simpleRegionStorage instanceof SpecificationSetter) {
+            ((SpecificationSetter) simpleRegionStorage).cesium$setSpec(databaseSpec);
         }
     }
 

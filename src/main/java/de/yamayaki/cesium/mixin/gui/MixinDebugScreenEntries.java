@@ -2,7 +2,7 @@ package de.yamayaki.cesium.mixin.gui;
 
 import de.yamayaki.cesium.api.accessor.DatabaseSource;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import org.lmdbjava.Stat;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,7 +13,7 @@ import java.util.List;
 @Mixin(DebugScreenEntries.class)
 public class MixinDebugScreenEntries {
     @Unique
-    private static final ResourceLocation CESIUM_STATS = DebugScreenEntries.register(ResourceLocation.fromNamespaceAndPath("cesium", "lmdb_stats"), (debugScreenDisplayer, level, levelChunk, levelChunk2) -> {
+    private static final Identifier CESIUM_STATS = DebugScreenEntries.register(Identifier.fromNamespaceAndPath("cesium", "lmdb_stats"), (debugScreenDisplayer, level, levelChunk, levelChunk2) -> {
         if(!(level instanceof ServerLevel serverLevel)) {
             return;
         }

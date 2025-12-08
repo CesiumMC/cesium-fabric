@@ -7,7 +7,6 @@
     "convert_server.MixinMain",
     "core.MixinMinecraftServer",
     "core.chunks.MixinChunkMap",
-    "core.chunks.MixinChunkStorage",
     "core.chunks.MixinEntityStorage",
     "core.chunks.MixinSectionStorage",
     "core.chunks.MixinServerLevel",

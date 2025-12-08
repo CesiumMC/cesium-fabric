@@ -7,7 +7,6 @@ import de.yamayaki.cesium.maintenance.storage.anvil.AnvilChunkStorage;
 import de.yamayaki.cesium.maintenance.storage.anvil.AnvilPlayerStorage;
 import de.yamayaki.cesium.maintenance.storage.cesium.CesiumChunkStorage;
 import de.yamayaki.cesium.maintenance.storage.cesium.CesiumPlayerStorage;
-import net.minecraft.Util;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
@@ -116,7 +115,7 @@ public class DatabaseConvert extends AbstractTask {
             _new.setChunkData(chunkPos, _old.getChunkData(chunkPos));
             _new.setPOIData(chunkPos, _old.getPOIData(chunkPos));
             _new.setEntityData(chunkPos, _old.getEntityData(chunkPos));
-        }, Util.backgroundExecutor()).exceptionally(throwable -> {
+        }, net.minecraft.util.Util.backgroundExecutor()).exceptionally(throwable -> {
             this.logger.error("Could not copy chunk into new storage.", throwable);
             return null;
         });

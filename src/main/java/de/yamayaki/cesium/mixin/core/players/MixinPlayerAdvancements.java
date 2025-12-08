@@ -94,7 +94,7 @@ public abstract class MixinPlayerAdvancements implements DatabaseSetter {
         return new BufferedReader(new StringReader(advancements));
     }
 
-    @Redirect(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/FileUtil;createDirectoriesSafe(Ljava/nio/file/Path;)V"))
+    @Redirect(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/FileUtil;createDirectoriesSafe(Ljava/nio/file/Path;)V"))
     private void disableFileCreation(Path path) {
         // Do nothing
     }
