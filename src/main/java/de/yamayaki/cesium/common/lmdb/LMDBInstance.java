@@ -19,11 +19,14 @@ import org.slf4j.Logger;
 
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HexFormat;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class LMDBInstance implements IDBInstance {
+    protected static final HexFormat HEX_FORMAT = HexFormat.of();
+
     private final Reference2ObjectMap<DatabaseSpec<?, ?>, KVDatabase<?, ?>> databases = new Reference2ObjectOpenHashMap<>();
     private final Reference2ObjectMap<DatabaseSpec<?, ?>, KVTransaction<?, ?>> transactions = new Reference2ObjectOpenHashMap<>();
 
@@ -162,7 +165,7 @@ public class LMDBInstance implements IDBInstance {
         }
     }
 
-    private void growMap() {
+    void growMap() {
         EnvInfo info = this.env.info();
 
         long oldSize = info.mapSize;

@@ -18,6 +18,7 @@ public class CesiumConfig {
     private final Option<Boolean> zstd_use_dictionary = new Option<>(true, "The compression ratio achievable can be highly improved using the built-in dictionary.");
     private final Option<Boolean> disable_compression = new Option<>(false, "HERE BE DRAGONS!! Forcefully disable all compression. A different database is used for uncompressed data, you can't have compressed and uncompressed worlds at the same time. Compressed worlds have to be reimported.");
     private final Option<Boolean> force_save_after_tick = new Option<>(false, "HERE BE DRAGONS!! Forces the (internal) to save all player and chunk data after each server tick. This option can slow down your server.");
+    private final Option<Boolean> dump_and_remove_data_on_error = new Option<>(false, "HERE BE DRAGON!! Dumps erroring data to disk and removes it from the database");
 
     public boolean logMapGrows() {
         return this.log_map_grows.value;
@@ -41,6 +42,10 @@ public class CesiumConfig {
 
     public boolean saveAfterTick() {
         return this.force_save_after_tick.value;
+    }
+
+    public boolean removeErroringData() {
+        return this.dump_and_remove_data_on_error.value;
     }
 
     @SuppressWarnings({"unused", "FieldMayBeFinal", "FieldCanBeLocal"})

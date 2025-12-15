@@ -1,5 +1,6 @@
 package de.yamayaki.cesium.common.lmdb;
 
+import de.yamayaki.cesium.CesiumMod;
 import de.yamayaki.cesium.api.database.DatabaseSpec;
 import de.yamayaki.cesium.api.database.ICloseableIterator;
 import de.yamayaki.cesium.api.database.IKVDatabase;
@@ -8,18 +9,18 @@ import de.yamayaki.cesium.api.io.IScannable;
 import de.yamayaki.cesium.api.io.ISerializer;
 import de.yamayaki.cesium.common.DefaultCompressors;
 import de.yamayaki.cesium.common.DefaultSerializers;
-import org.lmdbjava.Cursor;
-import org.lmdbjava.Dbi;
-import org.lmdbjava.DbiFlags;
-import org.lmdbjava.Env;
-import org.lmdbjava.Stat;
-import org.lmdbjava.Txn;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.lmdbjava.*;
 
 import java.io.IOException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import static de.yamayaki.cesium.common.lmdb.LMDBInstance.HEX_FORMAT;
+
 public class KVDatabase<K, V> implements IKVDatabase<K, V> {
     private final LMDBInstance storage;
+    private final DatabaseSpec<K, V> spec;
 
     private final Env<byte[]> env;
     private final Dbi<byte[]> dbi;
@@ -31,6 +32,7 @@ public class KVDatabase<K, V> implements IKVDatabase<K, V> {
 
     public KVDatabase(LMDBInstance storage, DatabaseSpec<K, V> spec, boolean compressed) {
         this.storage = storage;
+        this.spec = spec;
 
         this.env = this.storage.env;
         this.dbi = this.env.openDbi(spec.getName(), DbiFlags.MDB_CREATE);
@@ -59,16 +61,24 @@ public class KVDatabase<K, V> implements IKVDatabase<K, V> {
     @Override
     public byte[] getBytes(final K key) {
         ReentrantReadWriteLock lock = this.storage.getLock();
-        byte[] buf;
+        byte[] keyBuf = null;
+        byte[] buf = null;
 
         lock.readLock()
                 .lock();
 
         try {
             try {
-                buf = this.dbi.get(this.env.txnRead(), this.keySerializer.serialize(key));
-            } catch (final IOException e) {
-                throw new RuntimeException("Failed to deserialize key", e);
+                keyBuf = this.keySerializer.serialize(key);
+                buf = this.dbi.get(this.env.txnRead(), keyBuf);
+            } catch (final Exception e) {
+                if (CesiumMod.config().removeErroringData()) {
+                    this.printErroringData(keyBuf, buf);
+                    this.forceDelete(key);
+                    return null;
+                } else {
+                    throw new RuntimeException("Failed to deserialize key", e);
+                }
             }
         } finally {
             lock.readLock()
@@ -82,8 +92,48 @@ public class KVDatabase<K, V> implements IKVDatabase<K, V> {
         try {
             return this.compressor.decompress(buf);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to decompress value", e);
+            if (CesiumMod.config().removeErroringData()) {
+                this.printErroringData(keyBuf, buf);
+                this.forceDelete(key);
+                return null;
+            } else {
+                throw new RuntimeException("Failed to deserialize key", e);
+            }
         }
+    }
+
+    private void forceDelete(final @NotNull K key) {
+        this.storage.getLock()
+                .writeLock()
+                .lock();
+
+        boolean success = false;
+
+        while (!success) {
+            try (final Txn<byte[]> txn = this.env.txnWrite()) {
+                this.delete(txn, key);
+                txn.commit();
+
+                success = true;
+            } catch (Exception e) {
+                if (e instanceof LmdbException lE && lE instanceof Env.MapFullException) {
+                    this.storage.growMap();
+                } else {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        this.storage.getLock()
+                .writeLock()
+                .unlock();
+    }
+
+    public void printErroringData(final byte @Nullable [] key, final byte @Nullable [] value) {
+        final String keyInHex = key != null ? HEX_FORMAT.formatHex(key) : System.nanoTime() + "";
+        final String valueInHex = HEX_FORMAT.formatHex(value != null ? value : new byte[0]);
+
+        this.storage.logger.info("Dumping data for {}:\nKEY: {}\nVALUE: {}", this.spec.getName(), keyInHex, valueInHex);
     }
 
     //idea by https://github.com/mo0dss/radon-fabric
